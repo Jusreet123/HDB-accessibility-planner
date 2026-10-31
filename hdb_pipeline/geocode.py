@@ -74,10 +74,11 @@ def _lookup(blk_no: str, street: str):
     return None, None, None                                   # address genuinely not found
 
 
-def _lookup_with_retry(blk_no, street, throttle: Throttle, max_tries=6):
+def _with_retry(fn, throttle: Throttle, max_tries=6):
+    """Call fn() and handle OneMap's rate limit / server / network errors. Raises after max_tries."""
     for _ in range(max_tries):
         try:
-            return _lookup(blk_no, street)
+            return fn()
         except urllib.error.HTTPError as e:
             if e.code == 429:
                 ra = e.headers.get("Retry-After") if e.headers else None
@@ -91,6 +92,10 @@ def _lookup_with_retry(blk_no, street, throttle: Throttle, max_tries=6):
             print(f"  network problem ({e}) - waiting 10s")
             time.sleep(10)
     raise RuntimeError("gave up after repeated errors")
+
+
+def _lookup_with_retry(blk_no, street, throttle: Throttle, max_tries=6):
+    return _with_retry(lambda: _lookup(blk_no, street), throttle, max_tries)
 
 
 def _run(todo: pd.DataFrame, cache: pd.DataFrame, cache_path: Path, label: str,
@@ -150,4 +155,76 @@ def geocode_blocks(blocks: pd.DataFrame, cache_path: Path, throttle: Throttle | 
           f"about {len(todo) * throttle.delay / 60:.0f} min at the current pace. Ctrl+C to stop, rerun to resume.")
     if len(todo):
         cache = _run(todo, cache, cache_path, "blocks", throttle, save_every=100)
+    return cache
+
+
+# ---------------------------------------------------------------------------------------------
+# Postal codes (used for childcare centres)
+# ---------------------------------------------------------------------------------------------
+POSTAL_COLUMNS = ["postal", "latitude", "longitude", "source"]
+
+
+def _lookup_postal(postal: str):
+    """Only accept a result whose postal code is EXACTLY the one asked for (a near miss would
+    put the centre in the wrong building). Returns (lat, lon) or (None, None)."""
+    for res in _search(postal):
+        if res.get("POSTAL") == postal:
+            return float(res["LATITUDE"]), float(res["LONGITUDE"])
+    return None, None
+
+
+def geocode_postals(postals, cache_path: Path, throttle: Throttle | None = None,
+                    block_cache: pd.DataFrame | None = None, save_every=50) -> pd.DataFrame:
+    """Coordinates for a list of 6-digit postal codes.
+    1. FREE: postal codes that match an HDB block you already geocoded (source = "hdb_block").
+    2. OneMap lookup for the rest (source = "onemap", or "not_found").
+    Resumable like the block stage: Ctrl+C keeps progress; rerun to continue."""
+    throttle = throttle or Throttle()
+    wanted = sorted({p for p in postals if isinstance(p, str) and len(p) == 6 and p.isdigit()})
+    cache = (pd.read_csv(cache_path, dtype={"postal": str}) if cache_path.exists()
+             else pd.DataFrame(columns=POSTAL_COLUMNS))
+    done = set(cache["postal"])
+
+    # 1. reuse block results
+    if block_cache is not None and len(block_cache):
+        b = block_cache.dropna(subset=["latitude"])
+        b = b[b["postal"].astype(str).str.fullmatch(r"\d{6}")].drop_duplicates("postal")
+        seed = b[b["postal"].isin(set(wanted) - done)]
+        if len(seed):
+            cache = pd.concat([cache, pd.DataFrame({"postal": seed["postal"], "latitude": seed["latitude"],
+                                                    "longitude": seed["longitude"], "source": "hdb_block"})],
+                              ignore_index=True)
+            cache.to_csv(cache_path, index=False)
+            done = set(cache["postal"])
+            print(f"postal codes: {len(seed)} matched to HDB blocks you already geocoded (no lookup needed)")
+
+    # 2. OneMap for the rest
+    todo = [p for p in wanted if p not in done]
+    print(f"postal codes: {len(todo)} to look up on OneMap ({len(done)} already done) - "
+          f"about {len(todo) * throttle.delay / 60:.0f} min. Ctrl+C to stop, rerun to resume.")
+    rows, failed = [], 0
+    try:
+        for i, postal in enumerate(todo, 1):
+            try:
+                lat, lon = _with_retry(lambda: _lookup_postal(postal), throttle)
+                rows.append({"postal": postal, "latitude": lat, "longitude": lon,
+                             "source": "onemap" if lat is not None else "not_found"})
+                throttle.success()
+            except Exception as e:                            # not cached -> retried next run
+                failed += 1
+                print(f"  skipped {postal}: {e}")
+            if i % save_every == 0 or i == len(todo):
+                cache = pd.concat([cache, pd.DataFrame(rows, columns=POSTAL_COLUMNS)], ignore_index=True)
+                cache.to_csv(cache_path, index=False)
+                rows = []
+                print(f"  postal codes: {i}/{len(todo)} done | pace {throttle.per_minute:.0f}/min | "
+                      f"~{(len(todo) - i) * throttle.delay / 60:.0f} min left")
+            throttle.wait()
+    except KeyboardInterrupt:
+        print("\nstopped by you - saving progress")
+        cache = pd.concat([cache, pd.DataFrame(rows, columns=POSTAL_COLUMNS)], ignore_index=True)
+        cache.to_csv(cache_path, index=False)
+        raise
+    found = cache["latitude"].notna().sum()
+    print(f"postal codes: {found}/{len(cache)} located; {failed} skipped this run (rerun to retry)")
     return cache
