@@ -8,6 +8,8 @@ Stages:
     clean     raw files      -> out/cleaned/   (one file per dataset; GeoJSON also as .geojson for MongoDB)
     geocode_streets (optional) -> out/street_geocode_cache.csv  (~670 streets, minutes; needs internet)
     geocode   (optional)     -> streets first, then out/block_geocode_cache.csv (hours; resumable)
+    geocode_childcare (optional) -> out/childcare_geocode_cache.csv (postal codes; reuses block results
+                                    first, then OneMap for the rest, ~15 min) and childcare_centres.geojson
     tables    out/cleaned/   -> out/tables/    (CSV per relational table, ready to load)
     validate  out/tables/    -> out/reports/validation_report.csv
 
@@ -84,6 +86,11 @@ def run_pipeline(raw, out="pipeline_output", stages=ALL_STAGES):
     geocode_path = out / config.GEOCODE_CACHE
     rows_in = None
 
+    needs_cleaned = any(st in stages for st in ("geocode", "geocode_streets", "geocode_childcare", "tables"))
+    if needs_cleaned and "clean" not in stages and not (cleaned_dir / "hdb_property_info.csv").exists():
+        print(f"(no cleaned files in {cleaned_dir} yet - running the clean stage first)")
+        stages = ["clean"] + stages
+
     if "clean" in stages:
         print("== clean")
         reports = stage_clean(raw, out)
@@ -104,6 +111,27 @@ def run_pipeline(raw, out="pipeline_output", stages=ALL_STAGES):
                 geocode_blocks(blocks, geocode_path, throttle)
             except KeyboardInterrupt:
                 print("Block geocoding paused. Rebuilding tables with what is saved so far ...")
+
+    childcare_cache = out / config.CHILDCARE_GEOCODE_CACHE
+    if "geocode_childcare" in stages:
+        print("== geocode: childcare postal codes")
+        from .geocode import Throttle, geocode_postals
+        cc = pd.read_csv(cleaned_dir / "childcare_centres.csv", dtype={"postal_code": str}, usecols=["postal_code"])
+        block_cache = pd.read_csv(geocode_path, dtype={"postal": str}) if geocode_path.exists() else None
+        if block_cache is None:
+            print("  (no block_geocode_cache.csv found - every postal code will be looked up on OneMap)")
+        try:
+            geocode_postals(cc["postal_code"], childcare_cache, Throttle(), block_cache)
+        except KeyboardInterrupt:
+            print("Childcare geocoding paused. Saving what is done so far ...")
+
+    # childcare documents for MongoDB (coordinates + nested vacancy); cheap, so rebuilt whenever relevant
+    if (cleaned_dir / "childcare_centres.csv").exists() and \
+            any(st in stages for st in ("clean", "geocode_childcare", "tables")):
+        from . import childcare_geo
+        summary = childcare_geo.build(cleaned_dir, childcare_cache)
+        print(f"== childcare documents: {summary['located']}/{summary['centres']} centres located "
+              f"{summary['by_source']}")
 
     built = None
     if "tables" in stages:
@@ -141,7 +169,7 @@ def main():
     ap = argparse.ArgumentParser(description="HDB project data pipeline")
     ap.add_argument("--raw", required=True, type=Path, help="folder with the original downloaded files")
     ap.add_argument("--out", default=Path("pipeline_output"), type=Path, help="output folder")
-    ap.add_argument("--stages", default=",".join(ALL_STAGES), help="comma list: clean,geocode_streets,geocode,tables,validate,relationships")
+    ap.add_argument("--stages", default=",".join(ALL_STAGES), help="comma list: clean,geocode_streets,geocode,geocode_childcare,tables,validate,relationships")
     a = ap.parse_args()
     run_pipeline(a.raw, a.out, a.stages)
 
