@@ -1,0 +1,979 @@
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+/* =========================================
+   1. GLOBAL STYLES
+========================================= */
+
+:root {
+    --navy: #102B3F;
+    --teal: #138F80;
+    --cream: #FAFAF7;
+    --white: #FFFFFF;
+    --muted: #64748B;
+    --border: #E4EBEF;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--navy);
+}
+
+button,
+input,
+select {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+a {
+    color: inherit;
+}
+
+/* =========================================
+   2. NAVIGATION
+========================================= */
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 7%;
+    background: var(--white);
+}
+
+.logo {
+    font-family: 'Manrope', sans-serif;
+    font-size: 30px;
+    font-weight: 800;
+    text-decoration: none;
+    color: var(--navy);
+    letter-spacing: -1.5px;
+}
+
+.logo span {
+    color: var(--teal);
+}
+
+.navbar nav {
+    display: flex;
+    gap: 32px;
+}
+
+.navbar nav a {
+    color: var(--navy);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.navbar nav a:hover,
+.navbar nav a[aria-current="page"] {
+    color: var(--teal);
+}
+
+/* =========================================
+   3. HOMEPAGE HERO
+========================================= */
+
+.hero {
+    min-height: 650px;
+    display: flex;
+    align-items: center;
+    padding: 100px 7%;
+    background: linear-gradient(
+        110deg,
+        #102B3F 0%,
+        #183E50 65%,
+        #17675F 100%
+    );
+    color: var(--white);
+}
+
+.hero-content {
+    max-width: 850px;
+}
+
+.eyebrow {
+    color: #70D6C5;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    margin-bottom: 24px;
+}
+
+.hero h1 {
+    font-family: 'Manrope', sans-serif;
+    font-size: clamp(38px, 5vw, 68px);
+    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: -2px;
+    margin-bottom: 24px;
+}
+
+.hero-description {
+    max-width: 600px;
+    font-size: 17px;
+    line-height: 1.8;
+    color: #D5E2E8;
+    margin-bottom: 40px;
+}
+
+/* =========================================
+   4. HOMEPAGE SEARCH BAR
+========================================= */
+
+.search-box {
+    display: flex;
+    background: var(--white);
+    border-radius: 12px;
+    padding: 8px;
+    max-width: 680px;
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.15);
+}
+
+.search-box input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    padding: 18px;
+    font-size: 14px;
+}
+
+.search-box button {
+    background: var(--teal);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    padding: 16px 26px;
+    font-size: 14px;
+    font-weight: 700;
+    transition: background 0.2s ease;
+}
+
+.search-box button:hover {
+    background: #0E7569;
+}
+
+/* =========================================
+   5. HOMEPAGE FEATURES
+========================================= */
+
+.features {
+    padding: 100px 7% 120px;
+    background: var(--cream);
+}
+
+.section-heading {
+    max-width: 750px;
+    margin: 0 auto 55px;
+    text-align: center;
+}
+
+.section-heading .eyebrow {
+    color: var(--teal);
+    margin-bottom: 18px;
+}
+
+.section-heading h2 {
+    font-family: 'Manrope', sans-serif;
+    font-size: clamp(28px, 3vw, 42px);
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -1.2px;
+    margin-bottom: 20px;
+}
+
+.section-heading > p:last-child {
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1.8;
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 26px;
+    max-width: 1250px;
+    margin: 0 auto;
+}
+
+.feature-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 38px 32px;
+    min-height: 280px;
+    box-shadow: 0 8px 30px rgba(16, 43, 63, 0.035);
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-7px);
+    border-color: #B6DFD8;
+    box-shadow: 0 18px 45px rgba(16, 43, 63, 0.10);
+}
+
+.feature-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px;
+    height: 60px;
+    margin-bottom: 28px;
+    border-radius: 14px;
+    background: #E5F5F1;
+    color: var(--teal);
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.feature-card h3 {
+    font-family: 'Manrope', sans-serif;
+    font-size: 19px;
+    font-weight: 800;
+    line-height: 1.4;
+    margin-bottom: 14px;
+}
+
+.feature-card p {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.8;
+}
+
+/* =========================================
+   6. EXPLORE PAGE INTRODUCTION
+========================================= */
+
+.explore-intro {
+    padding: 80px 7% 90px;
+    background: linear-gradient(
+        115deg,
+        #102B3F 0%,
+        #183E50 70%,
+        #17675F 100%
+    );
+    color: var(--white);
+}
+
+.explore-intro-content {
+    max-width: 850px;
+}
+
+.explore-intro .eyebrow {
+    margin-bottom: 20px;
+}
+
+.explore-intro h1 {
+    font-family: 'Manrope', sans-serif;
+    font-size: clamp(34px, 4vw, 54px);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -1.5px;
+    margin-bottom: 20px;
+}
+
+.explore-intro-content > p:last-child {
+    max-width: 650px;
+    color: #D5E2E8;
+    font-size: 16px;
+    line-height: 1.8;
+}
+
+/* =========================================
+   7. EXPLORE PAGE LAYOUT
+========================================= */
+
+.explore-section {
+    padding: 0 7% 110px;
+    background: var(--cream);
+}
+
+.explore-container {
+    max-width: 1300px;
+    margin: 0 auto;
+}
+
+.filter-panel {
+    position: relative;
+    margin-top: -38px;
+    padding: 36px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: 0 18px 55px rgba(16, 43, 63, 0.09);
+}
+
+.filter-heading {
+    margin-bottom: 28px;
+}
+
+.filter-heading h2 {
+    font-family: 'Manrope', sans-serif;
+    font-size: 23px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.filter-heading p {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+/* =========================================
+   8. EXPLORE SEARCH AND FILTERS
+========================================= */
+
+.filter-search {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.filter-search label,
+.filter-field label,
+.sort-field label {
+    color: var(--navy);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.filter-search input,
+.filter-field input,
+.filter-field select,
+.sort-field select {
+    width: 100%;
+    min-height: 52px;
+    padding: 0 16px;
+    background: var(--white);
+    color: var(--navy);
+    border: 1px solid #DCE5EA;
+    border-radius: 9px;
+    font-size: 14px;
+    outline: none;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.filter-search input:focus,
+.filter-field input:focus,
+.filter-field select:focus,
+.sort-field select:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(19, 143, 128, 0.12);
+}
+
+.filter-search input::placeholder,
+.filter-field input::placeholder {
+    color: #94A3B8;
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.filter-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 14px;
+    margin-top: 30px;
+}
+
+.primary-button,
+.reset-button {
+    min-height: 48px;
+    padding: 12px 26px;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 700;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.primary-button {
+    background: var(--teal);
+    color: var(--white);
+    border: 1px solid var(--teal);
+}
+
+.primary-button:hover {
+    background: #0E7569;
+}
+
+.reset-button {
+    background: var(--white);
+    color: var(--navy);
+    border: 1px solid #DCE5EA;
+}
+
+.reset-button:hover {
+    background: #F1F5F7;
+    border-color: #B7C8D0;
+}
+
+/* =========================================
+   9. SEARCH RESULTS
+========================================= */
+
+.results-section {
+    margin-top: 65px;
+}
+
+.results-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 25px;
+}
+
+.results-header h2 {
+    font-family: 'Manrope', sans-serif;
+    font-size: 27px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.results-header p {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.sort-field {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    width: 220px;
+}
+
+.sort-field select {
+    min-height: 46px;
+}
+
+.results-container {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.results-container > .empty-results,
+.results-container > p {
+    grid-column: 1 / -1;
+}
+
+/* Historical resale transaction cards */
+.transaction-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+    padding: 28px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: 0 6px 24px rgba(16, 43, 63, 0.045);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.transaction-card:hover {
+    transform: translateY(-3px);
+    border-color: #B6DFD8;
+    box-shadow: 0 15px 35px rgba(16, 43, 63, 0.09);
+}
+
+.transaction-card h3 {
+    font-family: 'Manrope', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.transaction-town {
+    order: -1;
+    align-self: flex-start;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: #E5F5F1;
+    color: #0E7569;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+}
+
+.transaction-price {
+    margin-top: 8px;
+    font-family: 'Manrope', sans-serif;
+    font-size: clamp(23px, 2vw, 29px);
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    color: var(--teal);
+}
+
+.transaction-details {
+    padding-top: 15px;
+    border-top: 1px solid var(--border);
+    color: var(--navy);
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.transaction-date {
+    margin-top: auto;
+    padding-top: 8px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* =========================================
+   10. EMPTY RESULTS PLACEHOLDER
+========================================= */
+
+.empty-results {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 330px;
+    padding: 50px 25px;
+    background: var(--white);
+    border: 1px dashed #CBD8DF;
+    border-radius: 16px;
+    text-align: center;
+}
+
+.empty-results-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 74px;
+    height: 74px;
+    margin-bottom: 22px;
+    background: #E5F5F1;
+    color: var(--teal);
+    border-radius: 20px;
+    font-size: 38px;
+}
+
+.empty-results h3 {
+    font-family: 'Manrope', sans-serif;
+    font-size: 21px;
+    font-weight: 800;
+    margin-bottom: 12px;
+}
+
+.empty-results p {
+    max-width: 430px;
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.8;
+}
+
+/* =========================================
+   11. FUTURE RESULT CARDS
+========================================= */
+
+.result-card {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 25px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 5px 22px rgba(16, 43, 63, 0.035);
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.result-card:hover {
+    border-color: #B6DFD8;
+    box-shadow: 0 12px 30px rgba(16, 43, 63, 0.08);
+}
+
+.result-card-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.result-card h3 {
+    font-family: 'Manrope', sans-serif;
+    font-size: 19px;
+    margin-bottom: 10px;
+}
+
+.result-card p {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+/* =========================================
+   12. PAGINATION
+========================================= */
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 35px;
+}
+
+.pagination:empty {
+    display: none;
+}
+
+.pagination button {
+    min-width: 42px;
+    min-height: 42px;
+    padding: 8px 12px;
+    background: var(--white);
+    color: var(--navy);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.pagination button:hover:not(:disabled) {
+    border-color: var(--teal);
+    color: var(--teal);
+}
+
+.pagination button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.pagination span {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 12px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.pagination button.active {
+    background: var(--teal);
+    border-color: var(--teal);
+    color: var(--white);
+}
+
+/* =========================================
+   13. FOOTER
+========================================= */
+
+.site-footer {
+    padding: 55px 7%;
+    background: var(--navy);
+    color: var(--white);
+}
+
+.footer-content {
+    max-width: 1300px;
+    margin: 0 auto;
+}
+
+.site-footer .logo {
+    display: inline-block;
+    color: var(--white);
+    margin-bottom: 20px;
+}
+
+.footer-content > p {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #D5E2E8;
+}
+
+.footer-content .footer-note {
+    max-width: 620px;
+    margin-top: 18px;
+    color: #A9BDC7;
+    font-size: 12px;
+}
+
+/* =========================================
+   14. RESPONSIVE DESIGN
+========================================= */
+
+@media (max-width: 1100px) {
+    .results-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .filter-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1024px) {
+    .feature-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .navbar nav {
+        gap: 18px;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .navbar nav {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 16px;
+    }
+
+    .hero {
+        padding: 80px 6%;
+        min-height: 550px;
+    }
+
+    .hero h1 {
+        letter-spacing: -1px;
+    }
+
+    .search-box {
+        flex-direction: column;
+    }
+
+    .search-box button {
+        width: 100%;
+    }
+
+    .features {
+        padding: 70px 6% 85px;
+    }
+
+    .feature-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .feature-card {
+        min-height: auto;
+        padding: 30px;
+    }
+
+    .explore-intro {
+        padding: 65px 6% 85px;
+    }
+
+    .explore-section {
+        padding: 0 6% 75px;
+    }
+
+    .filter-panel {
+        padding: 26px 20px;
+    }
+
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-actions {
+        flex-direction: column-reverse;
+    }
+
+    .primary-button,
+    .reset-button {
+        width: 100%;
+    }
+
+    .results-section {
+        margin-top: 45px;
+    }
+
+    .results-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .sort-field {
+        width: 100%;
+    }
+
+    .result-card {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .results-container {
+        grid-template-columns: 1fr;
+    }
+
+    .transaction-card {
+        padding: 24px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .feature-card,
+    .result-card,
+    .transaction-card {
+        transition: none;
+    }
+
+    .feature-card:hover,
+    .transaction-card:hover {
+        transform: none;
+    }
+}
+
+/* =========================================
+   15. HDB BLOCK DETAILS PAGE
+========================================= */
+
+.block-details-section {
+    padding-top: 58px;
+}
+
+.block-details-section:first-child {
+    padding-top: 62px;
+}
+
+.block-details-section h2 {
+    font-family: 'Manrope', sans-serif;
+    font-size: clamp(23px, 2.5vw, 30px);
+    font-weight: 800;
+    letter-spacing: -0.7px;
+    margin-bottom: 18px;
+}
+
+.block-section-description {
+    max-width: 850px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.8;
+    margin: -5px 0 24px;
+}
+
+.block-overview-grid,
+.block-statistics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.block-info-card,
+.block-stat-card {
+    min-width: 0;
+    padding: 26px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 6px 24px rgba(16, 43, 63, 0.04);
+}
+
+.block-info-label,
+.block-stat-label {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
+.block-info-card h3 {
+    font-family: 'Manrope', sans-serif;
+    font-size: clamp(16px, 1.6vw, 20px);
+    font-weight: 800;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.block-stat-card {
+    border-top: 3px solid var(--teal);
+}
+
+.block-stat-value {
+    font-family: 'Manrope', sans-serif;
+    font-size: clamp(22px, 2vw, 29px);
+    font-weight: 800;
+    color: var(--teal);
+    letter-spacing: -0.7px;
+    overflow-wrap: anywhere;
+}
+
+.block-back-link {
+    margin-top: 50px;
+}
+
+.block-back-link a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 46px;
+    padding: 12px 20px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--white);
+    color: var(--navy);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.block-back-link a:hover {
+    border-color: var(--teal);
+    color: var(--teal);
+}
+
+@media (max-width: 1100px) {
+    .block-overview-grid,
+    .block-statistics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .block-details-section,
+    .block-details-section:first-child {
+        padding-top: 42px;
+    }
+
+    .block-overview-grid,
+    .block-statistics-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .block-info-card,
+    .block-stat-card {
+        padding: 22px;
+    }
+}
