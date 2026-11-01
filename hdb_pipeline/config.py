@@ -44,3 +44,4 @@ REPORTS_DIR = "reports"
 STAGING_DIR = "_staging"          # unzipped raw files go here (raw folder stays untouched)
 GEOCODE_CACHE = "block_geocode_cache.csv"
 STREET_GEOCODE_CACHE = "street_geocode_cache.csv"
+CHILDCARE_GEOCODE_CACHE = "childcare_geocode_cache.csv"

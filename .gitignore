@@ -225,3 +225,16 @@ pipeline_output/
 data sets/
 *.zip
 .env
+
+# Database credentials and certificates
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Node.js
+node_modules/
+dist/
+
+# VS Code local settings
+.vscode/
