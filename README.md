@@ -33,6 +33,7 @@ Open `clean_data_walkthrough.ipynb` (in this folder) to see the cleaning step by
 | `clean` | raw files | `cleaned/`: one CSV per dataset, plus `.geojson` for MongoDB |
 | `geocode_streets` (optional, needs internet) | cleaned blocks | `street_geocode_cache.csv`: one point per street (~670 lookups, minutes). Every block gets an approximate location. |
 | `geocode` (optional, needs internet) | cleaned blocks | Streets first, then `block_geocode_cache.csv`: the exact point and postal code per block (~13,500 lookups, hours). The speed adapts to OneMap's limit, and you can stop with Ctrl+C and resume. |
+| `geocode_childcare` (optional, needs internet) | cleaned childcare + `block_geocode_cache.csv` | `childcare_geocode_cache.csv`: coordinates per childcare postal code. It reuses your block results first (about 45% of centres, no lookups), then looks up the rest on OneMap (~15 min, resumable). It also writes `cleaned/childcare_centres.geojson` with nested documents for MongoDB. |
 | `tables` | `cleaned/` | `tables/`: one CSV per relational table |
 | `validate` | `tables/` | `reports/validation_report.csv`: PASS, WARN or FAIL per check |
 | `relationships` | `tables/`, `cleaned/` | `reports/relationship_report.csv`: proves each 1:M, M:1 and M:N relationship from the data |
@@ -58,7 +59,8 @@ hdb_pipeline/
   tables.py        builds the relational tables (one function per table)
   validate.py      quality checks (one line per check)
   relationships.py relationship-type proof (one line per relationship)
-  geocode.py       optional OneMap lookup with cache
+  geocode.py       optional OneMap lookup with cache (streets, blocks, postal codes)
+  childcare_geo.py childcare coordinates + nested MongoDB documents
   run.py           runs the stages
 ```
 
@@ -83,3 +85,9 @@ hdb_pipeline/
 - **MRT exits.** The station name plus exit code is not unique, because MRT and LRT stations share names. `objectid` is the key instead.
 - **Park coordinates.** Each park's longitude and latitude are the polygon centroid. Use the real shape in MongoDB for distance queries.
 - **Block coordinates.** These come from the geocode stage where available (`coord_source = "block"`). Otherwise they are street-level, from `hdb_resale_flats.csv` (`coord_source = "street"`).
+- **Childcare locations.** Each centre is located by its postal code: from an already-geocoded HDB block where the postal code matches (`coord_source = "hdb_block"`), otherwise from OneMap (`"onemap"`). A OneMap result is only accepted if its postal code matches exactly; otherwise the centre is left unlocated rather than placed in the wrong building. Centres with no postal code can't be located.
+- **Childcare documents (MongoDB).** The 42 flat vacancy columns become `vacancy.<age group>.<month> = {status, code}`. Second languages become an array, Yes/No values become true/false, and opening hours become `{open, close}`. `vacancy_as_of` records the date of the snapshot.
+
+## Saving geocoding results for teammates
+
+After a geocode stage, copy its cache file(s) from `pipeline_output` into the repo's `geocode` folder and commit them: `block_geocode_cache.csv`, `street_geocode_cache.csv` and `childcare_geocode_cache.csv`. Teammates copy them back into their own `pipeline_output` folder and never need to redo the lookups.

@@ -69,6 +69,9 @@ def run_checks(tables: dict, cleaned_dir: Path, reports_dir: Path, rows_in_resal
         check("childcare: postal code is 6 digits", (~pc.str.fullmatch(r"\d{6}")).sum())
         check("childcare: postal code missing", df["postal_code"].isna().sum(), "warn", "blank in source")
         check("childcare: name missing (kept, has tp_code)", (df["name_missing"] == "True").sum(), "warn")
+        if "latitude" in df:
+            check("childcare: centres without coordinates", df["latitude"].isna().sum(), "warn",
+                  "no postal code, or postal not found on OneMap; run geocode_childcare if this is all of them")
 
     report = pd.DataFrame(results)
     reports_dir.mkdir(parents=True, exist_ok=True)
