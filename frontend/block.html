@@ -1,0 +1,108 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>HDB Block Details | Haven.</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/block.js" defer></script>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <header class="navbar">
+        <a href="index.html" class="logo">Haven<span>.</span></a>
+
+        <nav aria-label="Main navigation">
+            <a href="index.html">Home</a>
+            <a href="explore.html" aria-current="page">Explore HDB</a>
+            <a href="#">Neighbourhoods</a>
+            <a href="#">Compare</a>
+            <a href="#">Market Insights</a>
+        </nav>
+    </header>
+
+    <!-- Introduction -->
+    <section class="explore-intro">
+        <div class="explore-intro-content">
+            <p class="eyebrow">HAVEN / BLOCK INSIGHTS</p>
+
+            <h1 id="blockAddress">Loading block details...</h1>
+
+            <p id="blockLocation">
+                Discover historical resale transactions and
+                property information for this HDB block.
+            </p>
+        </div>
+    </section>
+
+    <!-- Block information -->
+    <main class="explore-section">
+        <div class="explore-container">
+
+            <section class="block-details-section">
+                <h2>Block overview</h2>
+
+                <div id="blockOverview">
+                    <p>Loading block information...</p>
+                </div>
+            </section>
+
+            <!-- Statistics -->
+            <section class="block-details-section">
+                <h2>Historical resale overview</h2>
+
+                <p class="block-section-description">
+                    These statistics are based on recorded historical
+                    resale transactions across different flat types
+                    and years. They are not current property valuations.
+                </p>
+
+                <div id="blockStatistics">
+                    <p>Loading resale statistics...</p>
+                </div>
+            </section>
+
+            <!-- Transaction history -->
+            <section class="block-details-section">
+                <h2>Recent resale transactions</h2>
+
+                <p class="block-section-description">
+                    Showing up to 20 of the most recent recorded
+                    transactions for this block.
+                </p>
+
+                <div id="blockTransactions" class="results-container">
+                    <p>Loading transactions...</p>
+                </div>
+            </section>
+
+            <div class="block-back-link">
+                <a href="explore.html">← Back to Explore HDB</a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <a href="index.html" class="logo">
+                Haven<span>.</span>
+            </a>
+
+            <p>Find your place. Know your neighbourhood.</p>
+
+            <p class="footer-note">
+                Haven provides historical HDB resale information
+                for educational and informational purposes.
+            </p>
+        </div>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,299 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Explore HDB | Haven.</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/explore.js" defer></script>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <header class="navbar">
+        <a href="index.html" class="logo">
+            haven<span>.</span>
+        </a>
+
+        <nav aria-label="Main navigation">
+            <a href="index.html">Home</a>
+            <a href="explore.html" aria-current="page">Explore HDB</a>
+            <a href="#">Neighbourhoods</a>
+            <a href="#">Compare</a>
+            <a href="#">Market Insights</a>
+        </nav>
+    </header>
+
+    <main>
+
+        <!-- Page Introduction -->
+        <section class="explore-intro">
+            <div class="explore-intro-content">
+
+                <p class="eyebrow">
+                    DISCOVER YOUR NEXT NEIGHBOURHOOD
+                </p>
+
+                <h1>Explore HDB resale history.</h1>
+
+                <p>
+                    Search Singapore's HDB blocks, explore historical
+                    resale transactions and discover neighbourhoods
+                    that match your preferences.
+                </p>
+
+            </div>
+        </section>
+
+        <!-- Search and Filters -->
+        <section class="explore-section">
+
+            <div class="explore-container">
+
+                <div class="filter-panel">
+
+                    <div class="filter-heading">
+                        <h2>Find an HDB block</h2>
+                        <p>Refine your search using the filters below.</p>
+                    </div>
+
+                    <form id="exploreForm">
+
+                        <!-- Location Search -->
+                        <div class="filter-search">
+
+                            <label for="blockSearch">
+                                Search location
+                            </label>
+
+                            <input
+                                type="search"
+                                id="blockSearch"
+                                name="search"
+                                placeholder="Enter town, street or block number"
+                            >
+
+                        </div>
+
+                        <!-- Filter Fields -->
+                        <div class="filter-grid">
+
+                            <!-- Town -->
+                            <div class="filter-field">
+
+                                <label for="townFilter">Town</label>
+
+                                <select id="townFilter" name="town">
+                                    <option value="">All towns</option>
+                                    <option value="ANG MO KIO">Ang Mo Kio</option>
+                                    <option value="BEDOK">Bedok</option>
+                                    <option value="BISHAN">Bishan</option>
+                                    <option value="BUKIT BATOK">Bukit Batok</option>
+                                    <option value="BUKIT MERAH">Bukit Merah</option>
+                                    <option value="BUKIT PANJANG">Bukit Panjang</option>
+                                    <option value="CHOA CHU KANG">Choa Chu Kang</option>
+                                    <option value="CLEMENTI">Clementi</option>
+                                    <option value="GEYLANG">Geylang</option>
+                                    <option value="HOUGANG">Hougang</option>
+                                    <option value="JURONG EAST">Jurong East</option>
+                                    <option value="JURONG WEST">Jurong West</option>
+                                    <option value="KALLANG/WHAMPOA">Kallang/Whampoa</option>
+                                    <option value="PASIR RIS">Pasir Ris</option>
+                                    <option value="PUNGGOL">Punggol</option>
+                                    <option value="QUEENSTOWN">Queenstown</option>
+                                    <option value="SEMBAWANG">Sembawang</option>
+                                    <option value="SENGKANG">Sengkang</option>
+                                    <option value="SERANGOON">Serangoon</option>
+                                    <option value="TAMPINES">Tampines</option>
+                                    <option value="TOA PAYOH">Toa Payoh</option>
+                                    <option value="WOODLANDS">Woodlands</option>
+                                    <option value="YISHUN">Yishun</option>
+                                </select>
+
+                            </div>
+
+                            <!-- Flat Type -->
+                            <div class="filter-field">
+
+                                <label for="flatTypeFilter">Flat type</label>
+
+                                <select id="flatTypeFilter" name="flatType">
+                                    <option value="">All flat types</option>
+                                    <option value="1 ROOM">1 Room</option>
+                                    <option value="2 ROOM">2 Room</option>
+                                    <option value="3 ROOM">3 Room</option>
+                                    <option value="4 ROOM">4 Room</option>
+                                    <option value="5 ROOM">5 Room</option>
+                                    <option value="EXECUTIVE">Executive</option>
+                                    <option value="MULTI GENERATION">Multi Generation</option>
+                                </select>
+
+                            </div>
+
+                            <!-- Minimum Price -->
+                            <div class="filter-field">
+
+                                <label for="minPrice">
+                                    Minimum resale price
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="minPrice"
+                                    name="minPrice"
+                                    min="0"
+                                    step="10000"
+                                    placeholder="Any minimum"
+                                >
+
+                            </div>
+
+                            <!-- Maximum Price -->
+                            <div class="filter-field">
+
+                                <label for="maxPrice">
+                                    Maximum resale price
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="maxPrice"
+                                    name="maxPrice"
+                                    min="0"
+                                    step="10000"
+                                    placeholder="Any maximum"
+                                >
+
+                            </div>
+
+                        </div>
+
+                        <!-- Search Buttons -->
+                        <div class="filter-actions">
+
+                            <button
+                                type="reset"
+                                class="reset-button"
+                            >
+                                Reset filters
+                            </button>
+
+                            <button
+                                type="submit"
+                                class="primary-button"
+                            >
+                                Search HDB
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+                <!-- Results -->
+                <div class="results-section">
+
+                    <div class="results-header">
+
+                        <div>
+                            <h2>HDB block results</h2>
+
+                            <p id="resultsCount">
+                                Search results will appear here.
+                            </p>
+                        </div>
+
+                        <div class="sort-field">
+
+                            <label for="sortResults">
+                                Sort by
+                            </label>
+
+                            <select id="sortResults">
+                                <option value="latest">
+                                    Latest transaction
+                                </option>
+
+                                <option value="price-low">
+                                    Price: Low to high
+                                </option>
+
+                                <option value="price-high">
+                                    Price: High to low
+                                </option>
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Database results will appear here -->
+                    <div
+                        id="resultsContainer"
+                        class="results-container"
+                    >
+
+                        <div class="empty-results">
+
+                            <div class="empty-results-icon">
+                                ⌂
+                            </div>
+
+                            <h3>
+                                Discover your next neighbourhood
+                            </h3>
+
+                            <p>
+                                Use the search filters above to explore
+                                HDB blocks and historical resale data.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Pagination -->
+                    <div
+                        id="pagination"
+                        class="pagination"
+                        aria-label="Search result pages"
+                    ></div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+
+        <div class="footer-content">
+
+            <a href="index.html" class="logo">
+                haven<span>.</span>
+            </a>
+
+            <p>
+                Find your place. Know your neighbourhood.
+            </p>
+
+            <p class="footer-note">
+                Historical HDB resale information for
+                research and exploration purposes.
+                Not an active property listing service.
+            </p>
+
+        </div>
+
+    </footer>
+
+</body>
+</html>
