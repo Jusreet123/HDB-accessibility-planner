@@ -26,31 +26,22 @@ for (const setting of requiredSettings) {
     }
 }
 
-// ==========================================
-// 2. LOAD MYSQL SSL CERTIFICATE
-// ==========================================
+
+ // ==========================================
+ // 2. LOAD MYSQL SSL CERTIFICATE
+ // ==========================================
 
 const sslCaSetting = process.env.DB_SSL_CA.trim();
 
 let caCertificate;
 
-// Convert escaped newlines to actual newlines
-const normalizedCa = sslCaSetting.replace(/\\n/g, "\n");
-
-if (normalizedCa.includes("BEGIN CERTIFICATE")) {
-    // Render: certificate provided directly as an environment variable
-    caCertificate = normalizedCa;
+if (sslCaSetting.length > 500 || sslCaSetting.includes("CERTIFICATE")) {
+    // Render: use the certificate directly
+    caCertificate = sslCaSetting.replace(/\\n/g, "\n");
 } else {
-    // Local development: certificate provided as a filename
-    const certificatePath = path.resolve(
-        __dirname,
-        sslCaSetting
-    );
-
-    caCertificate = fs.readFileSync(
-        certificatePath,
-        "utf8"
-    );
+    // Local: read certificate from a file
+    const certificatePath = path.resolve(__dirname, sslCaSetting);
+    caCertificate = fs.readFileSync(certificatePath, "utf8");
 }
 
 // ==========================================
