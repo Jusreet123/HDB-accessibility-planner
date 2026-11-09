@@ -18,6 +18,17 @@ require("dotenv").config({
 });
 
 const app = express();
+
+// ==========================================
+// RENDER HTTPS / GOOGLE LOGIN FIX
+// ==========================================
+
+// Trust Render's reverse proxy so secure
+// session cookies work correctly over HTTPS.
+if (process.env.NODE_ENV === "production") {
+    app.set("trust proxy", 1);
+}
+
 const PORT = process.env.PORT || 3000;
 
 // ==========================================
@@ -114,10 +125,7 @@ app.get("/api/mongodb/health", async (req, res) => {
 // 5. HDB TOWNS API
 // ==========================================
 
-// Town statistics from backend/routes/towns.js
 app.use("/api/towns", townsRouter);
-
-// Market Insights from backend/routes/insights.js
 app.use("/api/insights", insightsRouter);
 
 app.get("/api/towns", async (req, res) => {
@@ -302,11 +310,6 @@ app.get("/api/resale", async (req, res) => {
 // ==========================================
 // 7. HDB BLOCK SEARCH API
 // ==========================================
-
-// Example:
-// GET /api/blocks?search=ang%20mo%20kio
-// GET /api/blocks?search=123
-// GET /api/blocks?search=560123
 
 app.get("/api/blocks", async (req, res) => {
     try {
@@ -523,10 +526,6 @@ app.get("/api/mongodb/collections", async (req, res) => {
 // 10. NEARBY AMENITIES API
 // ==========================================
 
-// Routes from backend/routes/amenities.js
-// Example:
-// GET /api/blocks/1715/amenities?radius=500
-
 app.use("/api/blocks", amenitiesRouter);
 
 // ==========================================
@@ -534,7 +533,6 @@ app.use("/api/blocks", amenitiesRouter);
 // ==========================================
 
 // DEVELOPMENT ONLY
-// Remove this endpoint after inspecting the data.
 // Restricted to requests from the local machine.
 
 app.get("/api/debug/bus-stop-sample", async (req, res) => {
@@ -580,7 +578,6 @@ app.get("/api/debug/bus-stop-sample", async (req, res) => {
         });
 
     } catch (error) {
-
         console.error(
             "Bus stop inspection failed:",
             error.message
@@ -598,7 +595,6 @@ app.get("/api/debug/bus-stop-sample", async (req, res) => {
 // ==========================================
 
 // DEVELOPMENT ONLY
-// Remove this endpoint after inspecting the data.
 // Restricted to requests from the local machine.
 
 app.get("/api/debug/hawker-sample", async (req, res) => {
@@ -618,7 +614,6 @@ app.get("/api/debug/hawker-sample", async (req, res) => {
     }
 
     try {
-
         const mongoDb = getMongoDB();
 
         const sample = await mongoDb
@@ -645,7 +640,6 @@ app.get("/api/debug/hawker-sample", async (req, res) => {
         });
 
     } catch (error) {
-
         console.error(
             "Hawker centre inspection failed:",
             error.message
