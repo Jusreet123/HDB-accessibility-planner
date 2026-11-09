@@ -7,7 +7,10 @@ require("dotenv").config({
     path: path.join(__dirname, ".env")
 });
 
-// Check that the required settings exist
+// ==========================================
+// 1. VALIDATE DATABASE SETTINGS
+// ==========================================
+
 const requiredSettings = [
     "DB_HOST",
     "DB_PORT",
@@ -23,18 +26,34 @@ for (const setting of requiredSettings) {
     }
 }
 
-// Read Aiven's CA certificate
-const certificatePath = path.resolve(
-    __dirname,
-    process.env.DB_SSL_CA
-);
+// ==========================================
+// 2. LOAD MYSQL SSL CERTIFICATE
+// ==========================================
 
-const caCertificate = fs.readFileSync(
-    certificatePath,
-    "utf8"
-);
+const sslCaSetting = process.env.DB_SSL_CA.trim();
 
-// Create a reusable MySQL connection pool
+let caCertificate;
+
+if (sslCaSetting.includes("-----BEGIN CERTIFICATE-----")) {
+    // Production: certificate stored in Render environment variable
+    caCertificate = sslCaSetting.replace(/\\n/g, "\n");
+} else {
+    // Local development: certificate stored as a file
+    const certificatePath = path.resolve(
+        __dirname,
+        sslCaSetting
+    );
+
+    caCertificate = fs.readFileSync(
+        certificatePath,
+        "utf8"
+    );
+}
+
+// ==========================================
+// 3. CREATE MYSQL CONNECTION POOL
+// ==========================================
+
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
     port: Number(process.env.DB_PORT),
