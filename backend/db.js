@@ -34,11 +34,14 @@ const sslCaSetting = process.env.DB_SSL_CA.trim();
 
 let caCertificate;
 
-if (sslCaSetting.includes("-----BEGIN CERTIFICATE-----")) {
-    // Production: certificate stored in Render environment variable
-    caCertificate = sslCaSetting.replace(/\\n/g, "\n");
+// Convert escaped newlines to actual newlines
+const normalizedCa = sslCaSetting.replace(/\\n/g, "\n");
+
+if (normalizedCa.includes("BEGIN CERTIFICATE")) {
+    // Render: certificate provided directly as an environment variable
+    caCertificate = normalizedCa;
 } else {
-    // Local development: certificate stored as a file
+    // Local development: certificate provided as a filename
     const certificatePath = path.resolve(
         __dirname,
         sslCaSetting
