@@ -1,0 +1,420 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Town Details | Haven.</title>
+
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Leaflet CSS -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <!-- Leaflet MarkerCluster CSS -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"
+    >
+
+    <!-- Login and Profile Navigation -->
+    <script src="js/auth-nav.js" defer></script>
+</head>
+
+<body class="town-page">
+
+    <!-- ======================================
+         NAVIGATION
+    ======================================= -->
+
+    <header class="navbar">
+
+        <a href="index.html" class="logo">
+            haven<span>.</span>
+        </a>
+
+        <nav aria-label="Main navigation">
+
+            <a href="index.html">
+                Home
+            </a>
+
+            <a href="explore.html">
+                Explore HDB
+            </a>
+
+            <!-- FIXED: Removed incorrect aria-current -->
+            <a href="neighbourhoods.html">
+                Neighbourhoods
+            </a>
+
+            <a href="compare.html">
+                Compare
+            </a>
+
+            <a href="insights.html">
+                Market Insights
+            </a>
+
+        </nav>
+
+        <!-- ======================================
+             AUTHENTICATION NAVIGATION
+        ======================================= -->
+
+        <div class="auth-nav" id="authNav">
+
+            <!-- Guest Login -->
+            <a
+                href="login.html"
+                class="auth-login-btn"
+                id="loginNavBtn"
+                hidden
+            >
+                Login
+            </a>
+
+            <!-- Logged-in User Menu -->
+            <div
+                class="auth-user-menu"
+                id="userNavMenu"
+                hidden
+            >
+
+                <button
+                    type="button"
+                    class="profile-dropdown-toggle"
+                    id="profileDropdownToggle"
+                    aria-expanded="false"
+                    aria-controls="profileDropdown"
+                    aria-haspopup="true"
+                >
+
+                    <span
+                        class="profile-avatar"
+                        aria-hidden="true"
+                    >
+                        👤
+                    </span>
+
+                    <span id="navUsername">
+                        My Account
+                    </span>
+
+                    <span
+                        class="dropdown-arrow"
+                        aria-hidden="true"
+                    >
+                        ▾
+                    </span>
+
+                </button>
+
+                <!-- Profile Dropdown -->
+                <div
+                    class="profile-dropdown"
+                    id="profileDropdown"
+                    hidden
+                >
+
+                    <a
+                        href="wishlist.html"
+                        class="dropdown-item"
+                    >
+                        <span aria-hidden="true">♡</span>
+                        My Wishlist
+                    </a>
+
+                    <button
+                        type="button"
+                        id="logoutNavBtn"
+                        class="dropdown-item dropdown-logout"
+                    >
+                        <span aria-hidden="true">↪</span>
+                        Logout
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+    <!-- ======================================
+         MAIN CONTENT
+    ======================================= -->
+
+    <main class="town-details-page">
+
+        <!-- ==================================
+             BREADCRUMB
+        =================================== -->
+
+        <section class="town-breadcrumb">
+
+            <a href="neighbourhoods.html">
+                ← Back to Neighbourhoods
+            </a>
+
+        </section>
+
+        <!-- ==================================
+             TOWN HEADER
+        =================================== -->
+
+        <section class="town-hero">
+
+            <p class="section-label">
+                NEIGHBOURHOOD OVERVIEW
+            </p>
+
+            <h1 id="townTitle">
+                Loading neighbourhood...
+            </h1>
+
+            <p id="townDescription">
+                Explore HDB resale activity, housing
+                statistics and blocks in this town.
+            </p>
+
+            <a
+                id="townExploreLink"
+                href="explore.html"
+                class="btn btn-primary"
+            >
+                Explore HDB Blocks
+            </a>
+
+        </section>
+
+        <!-- ==================================
+             LOADING / ERROR STATUS
+        =================================== -->
+
+        <p
+            id="townStatus"
+            role="status"
+            aria-live="polite"
+        >
+            Loading town information...
+        </p>
+
+        <!-- ==================================
+             TOWN STATISTICS
+        =================================== -->
+
+        <section class="town-statistics-section">
+
+            <h2>
+                Town at a Glance
+            </h2>
+
+            <div
+                id="townStats"
+                class="town-stats-grid"
+            >
+                <!-- Generated by town.js -->
+            </div>
+
+        </section>
+
+        <!-- ==================================
+             FLAT TYPE BREAKDOWN
+        =================================== -->
+
+        <section class="town-flat-types-section">
+
+            <div class="section-heading">
+
+                <h2>
+                    Resale Prices by Flat Type
+                </h2>
+
+                <p>
+                    Compare historical resale prices
+                    across different flat types
+                    in this neighbourhood.
+                </p>
+
+            </div>
+
+            <div class="town-table-wrapper">
+
+                <table class="town-flat-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th scope="col">
+                                Flat Type
+                            </th>
+
+                            <th scope="col">
+                                Transactions
+                            </th>
+
+                            <th scope="col">
+                                Average Price
+                            </th>
+
+                            <th scope="col">
+                                Lowest Price
+                            </th>
+
+                            <th scope="col">
+                                Highest Price
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="townFlatTypes">
+                        <!-- Generated by town.js -->
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+        <!-- ==================================
+             HDB BLOCK MAP
+        =================================== -->
+
+        <section class="town-map-section">
+
+            <div class="section-heading">
+
+                <h2>
+                    HDB Blocks Map
+                </h2>
+
+                <p>
+                    Explore the geographical distribution
+                    of HDB blocks within this town.
+                    Select a marker to view its block details.
+                </p>
+
+            </div>
+
+            <div
+                id="townMap"
+                class="town-map"
+                role="region"
+                aria-label="Interactive map of HDB blocks"
+            ></div>
+
+        </section>
+
+        <!-- ==================================
+             HDB BLOCK DIRECTORY
+        =================================== -->
+
+        <section class="town-blocks-section">
+
+            <div class="section-heading">
+
+                <h2>
+                    HDB Blocks
+                </h2>
+
+                <p
+                    id="townBlockCount"
+                    aria-live="polite"
+                >
+                    Loading blocks...
+                </p>
+
+            </div>
+
+            <!-- Block Search -->
+            <div class="town-block-controls">
+
+                <input
+                    type="search"
+                    id="townBlockSearch"
+                    placeholder="Search block number, street or postal code..."
+                    aria-label="Search HDB blocks"
+                    autocomplete="off"
+                >
+
+            </div>
+
+            <!-- Block Results -->
+            <div
+                id="townBlockResults"
+                class="town-block-grid"
+            >
+                <!-- Generated by town.js -->
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- ======================================
+         FOOTER
+    ======================================= -->
+
+    <footer class="site-footer">
+
+        <div class="footer-content">
+
+            <a href="index.html" class="logo">
+                haven<span>.</span>
+            </a>
+
+            <p>
+                Find your place. Know your neighbourhood.
+            </p>
+
+            <p class="footer-note">
+                Historical HDB resale information for
+                research and exploration purposes.
+                Not an active property listing service.
+            </p>
+
+        </div>
+
+    </footer>
+
+    <!-- ======================================
+         JAVASCRIPT
+    ======================================= -->
+
+    <!-- Leaflet JavaScript -->
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    ></script>
+
+    <!-- Leaflet MarkerCluster JavaScript -->
+    <script
+        src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"
+    ></script>
+
+    <!-- Town Details JavaScript -->
+    <script src="js/town.js"></script>
+
+</body>
+
+</html>

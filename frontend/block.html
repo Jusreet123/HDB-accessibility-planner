@@ -1,59 +1,210 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>HDB Block Details | Haven.</title>
 
+    <!-- Leaflet CSS -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <!-- Haven CSS -->
     <link rel="stylesheet" href="css/style.css">
+
+    <!-- Leaflet JavaScript -->
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""
+    ></script>
+
+    <!-- Haven JavaScript -->
     <script src="js/block.js" defer></script>
+    <script src="js/block-wishlist.js" defer></script>
+    <script src="js/auth-nav.js" defer></script>
 </head>
 
 <body>
 
-    <!-- Navigation -->
+    <!-- ===================================== -->
+    <!-- NAVIGATION -->
+    <!-- ===================================== -->
+
     <header class="navbar">
-        <a href="index.html" class="logo">Haven<span>.</span></a>
+
+        <a href="index.html" class="logo">
+            Haven<span>.</span>
+        </a>
 
         <nav aria-label="Main navigation">
             <a href="index.html">Home</a>
-            <a href="explore.html" aria-current="page">Explore HDB</a>
+            <a href="explore.html" aria-current="page">
+                Explore HDB
+            </a>
             <a href="#">Neighbourhoods</a>
-            <a href="#">Compare</a>
-            <a href="#">Market Insights</a>
+            <a href="compare.html">Compare</a>
+            <a href="insights.html">Market Insights</a>
         </nav>
+
+        <!-- Authentication Navigation -->
+        <div class="auth-nav" id="authNav">
+
+            <!-- Guest Login -->
+            <a
+                href="login.html"
+                class="auth-login-btn"
+                id="loginNavBtn"
+                hidden
+            >
+                Login
+            </a>
+
+            <!-- Logged-in Profile -->
+            <div
+                class="auth-user-menu"
+                id="userNavMenu"
+                hidden
+            >
+
+                <button
+                    type="button"
+                    class="profile-dropdown-toggle"
+                    id="profileDropdownToggle"
+                    aria-expanded="false"
+                    aria-controls="profileDropdown"
+                    aria-haspopup="true"
+                >
+                    <span
+                        class="profile-avatar"
+                        aria-hidden="true"
+                    >👤</span>
+
+                    <span id="navUsername">
+                        My Account
+                    </span>
+
+                    <span
+                        class="dropdown-arrow"
+                        aria-hidden="true"
+                    >▾</span>
+                </button>
+
+                <!-- Profile Dropdown -->
+                <div
+                    class="profile-dropdown"
+                    id="profileDropdown"
+                    hidden
+                >
+
+                    <a
+                        href="wishlist.html"
+                        class="dropdown-item"
+                    >
+                        <span aria-hidden="true">♡</span>
+                        My Wishlist
+                    </a>
+
+                    <button
+                        type="button"
+                        id="logoutNavBtn"
+                        class="dropdown-item dropdown-logout"
+                    >
+                        <span aria-hidden="true">↪</span>
+                        Logout
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
     </header>
 
-    <!-- Introduction -->
-    <section class="explore-intro">
-        <div class="explore-intro-content">
-            <p class="eyebrow">HAVEN / BLOCK INSIGHTS</p>
+    <!-- ===================================== -->
+    <!-- BLOCK INTRODUCTION -->
+    <!-- ===================================== -->
 
-            <h1 id="blockAddress">Loading block details...</h1>
+    <section class="explore-intro">
+
+        <div class="explore-intro-content">
+
+            <p class="eyebrow">
+                HAVEN / BLOCK INSIGHTS
+            </p>
+
+            <!-- Block Title and Wishlist -->
+            <div class="block-title-row">
+
+                <h1 id="blockAddress">
+                    Loading block details...
+                </h1>
+
+                <button
+                    type="button"
+                    id="blockWishlistButton"
+                    class="explore-wishlist-btn block-wishlist-btn"
+                    aria-label="Save to wishlist"
+                    aria-pressed="false"
+                    title="Save to My Wishlist"
+                    hidden
+                >
+                    ♡
+                </button>
+
+            </div>
+
+            <!-- Wishlist Feedback -->
+            <p
+                id="blockWishlistStatus"
+                class="block-wishlist-status"
+                role="status"
+                aria-live="polite"
+            ></p>
 
             <p id="blockLocation">
-                Discover historical resale transactions and
-                property information for this HDB block.
+                Discover historical resale transactions,
+                property information and nearby amenities
+                for this HDB block.
             </p>
+
         </div>
+
     </section>
 
-    <!-- Block information -->
+    <!-- ===================================== -->
+    <!-- MAIN CONTENT -->
+    <!-- ===================================== -->
+
     <main class="explore-section">
+
         <div class="explore-container">
 
+            <!-- ===================================== -->
+            <!-- BLOCK OVERVIEW -->
+            <!-- ===================================== -->
+
             <section class="block-details-section">
+
                 <h2>Block overview</h2>
 
                 <div id="blockOverview">
                     <p>Loading block information...</p>
                 </div>
+
             </section>
 
-            <!-- Statistics -->
+            <!-- ===================================== -->
+            <!-- HISTORICAL RESALE STATISTICS -->
+            <!-- ===================================== -->
+
             <section class="block-details-section">
+
                 <h2>Historical resale overview</h2>
 
                 <p class="block-section-description">
@@ -65,10 +216,901 @@
                 <div id="blockStatistics">
                     <p>Loading resale statistics...</p>
                 </div>
+
             </section>
 
-            <!-- Transaction history -->
+            <!-- ===================================== -->
+            <!-- NEARBY AMENITIES -->
+            <!-- ===================================== -->
+
+            <section
+                class="block-details-section"
+                id="nearbyAmenitiesSection"
+                aria-labelledby="nearbyAmenitiesHeading"
+            >
+
+                <div class="amenities-header">
+
+                    <div>
+
+                        <p class="eyebrow">
+                            EXPLORE YOUR SURROUNDINGS
+                        </p>
+
+                        <h2 id="nearbyAmenitiesHeading">
+                            Nearby amenities
+                        </h2>
+
+                        <p class="block-section-description">
+                            Discover transport connections, food options,
+                            childcare facilities and parks near this
+                            HDB block.
+                        </p>
+
+                    </div>
+
+                    <!-- Radius Selector -->
+                    <div class="amenities-radius-control">
+
+                        <label for="amenitiesRadius">
+                            Search radius
+                        </label>
+
+                        <select
+                            id="amenitiesRadius"
+                            name="amenitiesRadius"
+                        >
+                            <option value="500" selected>
+                                Within 500 m
+                            </option>
+
+                            <option value="1000">
+                                Within 1 km
+                            </option>
+
+                            <option value="2000">
+                                Within 2 km
+                            </option>
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <p class="amenities-distance-note">
+                    Distances are approximate straight-line distances
+                    from the HDB block, not walking or driving distances.
+                    Up to five nearest amenities are shown per category.
+                </p>
+
+                <!-- Amenity Cards -->
+                <div class="amenities-grid" id="amenitiesGrid">
+
+                    <!-- MRT -->
+                    <article
+                        class="amenity-category-card"
+                        data-category="mrt_exits"
+                    >
+
+                        <div class="amenity-category-heading">
+
+                            <span
+                                class="amenity-icon"
+                                aria-hidden="true"
+                            >
+                                🚇
+                            </span>
+
+                            <div>
+                                <h3>MRT exits</h3>
+                                <p>Nearby train connections</p>
+                            </div>
+
+                        </div>
+
+                        <div
+                            class="amenity-category-results"
+                            id="amenities-mrt_exits"
+                        >
+                            <p>Loading MRT exits...</p>
+                        </div>
+
+                    </article>
+
+                    <!-- BUS -->
+                    <article
+                        class="amenity-category-card"
+                        data-category="bus_stops"
+                    >
+
+                        <div class="amenity-category-heading">
+
+                            <span
+                                class="amenity-icon"
+                                aria-hidden="true"
+                            >
+                                🚌
+                            </span>
+
+                            <div>
+                                <h3>Bus stops</h3>
+                                <p>Public bus connections</p>
+                            </div>
+
+                        </div>
+
+                        <div
+                            class="amenity-category-results"
+                            id="amenities-bus_stops"
+                        >
+                            <p>Loading bus stops...</p>
+                        </div>
+
+                    </article>
+
+                    <!-- HAWKER -->
+                    <article
+                        class="amenity-category-card"
+                        data-category="hawker_centres"
+                    >
+
+                        <div class="amenity-category-heading">
+
+                            <span
+                                class="amenity-icon"
+                                aria-hidden="true"
+                            >
+                                🍜
+                            </span>
+
+                            <div>
+                                <h3>Hawker centres</h3>
+                                <p>Local food and dining</p>
+                            </div>
+
+                        </div>
+
+                        <div
+                            class="amenity-category-results"
+                            id="amenities-hawker_centres"
+                        >
+                            <p>Loading hawker centres...</p>
+                        </div>
+
+                    </article>
+
+                    <!-- CHILDCARE -->
+                    <article
+                        class="amenity-category-card"
+                        data-category="childcare_centres"
+                    >
+
+                        <div class="amenity-category-heading">
+
+                            <span
+                                class="amenity-icon"
+                                aria-hidden="true"
+                            >
+                                🧸
+                            </span>
+
+                            <div>
+                                <h3>Childcare centres</h3>
+                                <p>Nearby early childhood facilities</p>
+                            </div>
+
+                        </div>
+
+                        <div
+                            class="amenity-category-results"
+                            id="amenities-childcare_centres"
+                        >
+                            <p>Loading childcare centres...</p>
+                        </div>
+
+                    </article>
+
+                    <!-- PARKS -->
+                    <article
+                        class="amenity-category-card"
+                        data-category="parks"
+                    >
+
+                        <div class="amenity-category-heading">
+
+                            <span
+                                class="amenity-icon"
+                                aria-hidden="true"
+                            >
+                                🌳
+                            </span>
+
+                            <div>
+                                <h3>Parks</h3>
+                                <p>Green spaces and recreation</p>
+                            </div>
+
+                        </div>
+
+                        <div
+                            class="amenity-category-results"
+                            id="amenities-parks"
+                        >
+                            <p>Loading parks...</p>
+                        </div>
+
+                    </article>
+
+                </div>
+
+                <!-- Amenities Status -->
+                <p
+                    id="amenitiesStatus"
+                    class="amenities-status"
+                    role="status"
+                    aria-live="polite"
+                >
+                    Preparing nearby amenities...
+                </p>
+
+            </section>
+
+            <!-- ===================================== -->
+            <!-- ACCESSIBILITY SCORE -->
+            <!-- ===================================== -->
+
+            <section
+                class="block-details-section"
+                id="accessibilitySection"
+                aria-labelledby="accessibilityHeading"
+            >
+
+                <div class="accessibility-header">
+
+                    <div>
+
+                        <p class="eyebrow">
+                            YOUR NEIGHBOURHOOD, YOUR PRIORITIES
+                        </p>
+
+                        <h2 id="accessibilityHeading">
+                            Neighbourhood accessibility score
+                        </h2>
+
+                        <p class="block-section-description">
+                            Discover how well this HDB block matches
+                            your lifestyle. Adjust the importance
+                            of nearby amenities to calculate your
+                            personalised accessibility score.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- Overall Score -->
+                <div class="accessibility-summary">
+
+                    <div class="accessibility-score-overview">
+
+                        <p class="accessibility-score-label">
+                            YOUR ACCESSIBILITY SCORE
+                        </p>
+
+                        <div class="accessibility-score-number">
+
+                            <span
+                                id="accessibilityScore"
+                                aria-live="polite"
+                            >
+                                --
+                            </span>
+
+                            <span class="accessibility-score-total">
+                                / 100
+                            </span>
+
+                        </div>
+
+                        <p
+                            id="accessibilityRating"
+                            class="accessibility-rating"
+                        >
+                            Awaiting accessibility calculation...
+                        </p>
+
+                    </div>
+
+                    <div class="accessibility-score-progress">
+
+                        <div
+                            id="accessibilityScoreBar"
+                            class="accessibility-score-progress-fill"
+                            role="progressbar"
+                            aria-label="Overall accessibility score"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                            aria-valuenow="0"
+                            style="width: 0%;"
+                        ></div>
+
+                    </div>
+
+                    <p class="accessibility-score-description">
+                        Your score is calculated using your selected
+                        priorities and the proximity of nearby amenities.
+                    </p>
+
+                </div>
+
+                <!-- ===================================== -->
+                <!-- CUSTOMISABLE PRIORITIES -->
+                <!-- ===================================== -->
+
+                <div class="accessibility-preferences">
+
+                    <div class="accessibility-preferences-header">
+
+                        <div>
+
+                            <h3>Customise your priorities</h3>
+
+                            <p>
+                                Move the sliders to decide which
+                                amenities matter most to you.
+                            </p>
+
+                        </div>
+
+                        <button
+                            type="button"
+                            id="accessibilityReset"
+                            class="accessibility-reset"
+                        >
+                            Reset priorities
+                        </button>
+
+                    </div>
+
+                    <div class="accessibility-sliders">
+
+                        <!-- MRT -->
+                        <div class="accessibility-slider-item">
+
+                            <div class="accessibility-slider-heading">
+
+                                <label for="weight-mrt_exits">
+                                    🚇 MRT exits
+                                </label>
+
+                                <output
+                                    id="weightValue-mrt_exits"
+                                    for="weight-mrt_exits"
+                                >
+                                    30%
+                                </output>
+
+                            </div>
+
+                            <input
+                                type="range"
+                                id="weight-mrt_exits"
+                                class="accessibility-weight-slider"
+                                data-weight-category="mrt_exits"
+                                min="0"
+                                max="100"
+                                step="5"
+                                value="30"
+                            >
+
+                        </div>
+
+                        <!-- BUS -->
+                        <div class="accessibility-slider-item">
+
+                            <div class="accessibility-slider-heading">
+
+                                <label for="weight-bus_stops">
+                                    🚌 Bus stops
+                                </label>
+
+                                <output
+                                    id="weightValue-bus_stops"
+                                    for="weight-bus_stops"
+                                >
+                                    25%
+                                </output>
+
+                            </div>
+
+                            <input
+                                type="range"
+                                id="weight-bus_stops"
+                                class="accessibility-weight-slider"
+                                data-weight-category="bus_stops"
+                                min="0"
+                                max="100"
+                                step="5"
+                                value="25"
+                            >
+
+                        </div>
+
+                        <!-- HAWKER -->
+                        <div class="accessibility-slider-item">
+
+                            <div class="accessibility-slider-heading">
+
+                                <label for="weight-hawker_centres">
+                                    🍜 Hawker centres
+                                </label>
+
+                                <output
+                                    id="weightValue-hawker_centres"
+                                    for="weight-hawker_centres"
+                                >
+                                    20%
+                                </output>
+
+                            </div>
+
+                            <input
+                                type="range"
+                                id="weight-hawker_centres"
+                                class="accessibility-weight-slider"
+                                data-weight-category="hawker_centres"
+                                min="0"
+                                max="100"
+                                step="5"
+                                value="20"
+                            >
+
+                        </div>
+
+                        <!-- CHILDCARE -->
+                        <div class="accessibility-slider-item">
+
+                            <div class="accessibility-slider-heading">
+
+                                <label for="weight-childcare_centres">
+                                    🧸 Childcare centres
+                                </label>
+
+                                <output
+                                    id="weightValue-childcare_centres"
+                                    for="weight-childcare_centres"
+                                >
+                                    15%
+                                </output>
+
+                            </div>
+
+                            <input
+                                type="range"
+                                id="weight-childcare_centres"
+                                class="accessibility-weight-slider"
+                                data-weight-category="childcare_centres"
+                                min="0"
+                                max="100"
+                                step="5"
+                                value="15"
+                            >
+
+                        </div>
+
+                        <!-- PARKS -->
+                        <div class="accessibility-slider-item">
+
+                            <div class="accessibility-slider-heading">
+
+                                <label for="weight-parks">
+                                    🌳 Parks
+                                </label>
+
+                                <output
+                                    id="weightValue-parks"
+                                    for="weight-parks"
+                                >
+                                    10%
+                                </output>
+
+                            </div>
+
+                            <input
+                                type="range"
+                                id="weight-parks"
+                                class="accessibility-weight-slider"
+                                data-weight-category="parks"
+                                min="0"
+                                max="100"
+                                step="5"
+                                value="10"
+                            >
+
+                        </div>
+
+                    </div>
+
+                    <!-- Total Priority -->
+                    <div class="accessibility-weight-summary">
+
+                        <span>Total priority points</span>
+
+                        <strong id="accessibilityTotalWeight">
+                            100
+                        </strong>
+
+                    </div>
+
+                    <p class="accessibility-weight-note">
+                        Weights are automatically normalised to
+                        100% when calculating your score.
+                        You can adjust each slider independently.
+                    </p>
+
+                </div>
+
+                <!-- ===================================== -->
+                <!-- ACCESSIBILITY BREAKDOWN -->
+                <!-- ===================================== -->
+
+                <div class="accessibility-breakdown">
+
+                    <h3>Accessibility breakdown</h3>
+
+                    <p class="block-section-description">
+                        Each category is scored from 0 to 100
+                        based on the distance to its nearest
+                        available amenity.
+                    </p>
+
+                    <div class="accessibility-breakdown-list">
+
+                        <!-- MRT -->
+                        <div class="accessibility-breakdown-item">
+
+                            <div class="accessibility-breakdown-heading">
+                                <span>🚇 MRT accessibility</span>
+                                <strong id="score-mrt_exits">
+                                    -- / 100
+                                </strong>
+                            </div>
+
+                            <div class="accessibility-category-track">
+
+                                <div
+                                    id="scoreBar-mrt_exits"
+                                    class="accessibility-category-fill"
+                                    style="width: 0%; background-color: #8B5CF6;"
+                                ></div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- BUS -->
+                        <div class="accessibility-breakdown-item">
+
+                            <div class="accessibility-breakdown-heading">
+                                <span>🚌 Bus accessibility</span>
+                                <strong id="score-bus_stops">
+                                    -- / 100
+                                </strong>
+                            </div>
+
+                            <div class="accessibility-category-track">
+
+                                <div
+                                    id="scoreBar-bus_stops"
+                                    class="accessibility-category-fill"
+                                    style="width: 0%; background-color: #2563EB;"
+                                ></div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- HAWKER -->
+                        <div class="accessibility-breakdown-item">
+
+                            <div class="accessibility-breakdown-heading">
+                                <span>🍜 Food accessibility</span>
+                                <strong id="score-hawker_centres">
+                                    -- / 100
+                                </strong>
+                            </div>
+
+                            <div class="accessibility-category-track">
+
+                                <div
+                                    id="scoreBar-hawker_centres"
+                                    class="accessibility-category-fill"
+                                    style="width: 0%; background-color: #F59E0B;"
+                                ></div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- CHILDCARE -->
+                        <div class="accessibility-breakdown-item">
+
+                            <div class="accessibility-breakdown-heading">
+                                <span>🧸 Childcare accessibility</span>
+                                <strong id="score-childcare_centres">
+                                    -- / 100
+                                </strong>
+                            </div>
+
+                            <div class="accessibility-category-track">
+
+                                <div
+                                    id="scoreBar-childcare_centres"
+                                    class="accessibility-category-fill"
+                                    style="width: 0%; background-color: #EC4899;"
+                                ></div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- PARKS -->
+                        <div class="accessibility-breakdown-item">
+
+                            <div class="accessibility-breakdown-heading">
+                                <span>🌳 Parks accessibility</span>
+                                <strong id="score-parks">
+                                    -- / 100
+                                </strong>
+                            </div>
+
+                            <div class="accessibility-category-track">
+
+                                <div
+                                    id="scoreBar-parks"
+                                    class="accessibility-category-fill"
+                                    style="width: 0%; background-color: #16A34A;"
+                                ></div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- Accessibility Status -->
+                <p
+                    id="accessibilityStatus"
+                    class="accessibility-status"
+                    role="status"
+                    aria-live="polite"
+                >
+                    Waiting for nearby amenity data...
+                </p>
+
+                <p class="accessibility-disclaimer">
+                    Accessibility scores are indicative estimates
+                    based on available amenity data and approximate
+                    straight-line distances. They do not represent
+                    actual walking times, transport journey times,
+                    or official government accessibility ratings.
+                </p>
+
+            </section>
+
+            <!-- ===================================== -->
+            <!-- INTERACTIVE NEIGHBOURHOOD MAP -->
+            <!-- ===================================== -->
+
+            <section
+                class="block-details-section"
+                id="neighbourhoodMapSection"
+                aria-labelledby="neighbourhoodMapHeading"
+            >
+
+                <div class="map-section-header">
+
+                    <div>
+
+                        <p class="eyebrow">
+                            DISCOVER YOUR NEIGHBOURHOOD
+                        </p>
+
+                        <h2 id="neighbourhoodMapHeading">
+                            Neighbourhood map
+                        </h2>
+
+                        <p class="block-section-description">
+                            Explore the selected HDB block and nearby
+                            amenities on an interactive map.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- ===================================== -->
+                <!-- MAP LEGEND -->
+                <!-- ===================================== -->
+
+                <div
+                    class="map-legend"
+                    id="mapLegend"
+                    aria-labelledby="mapLegendHeading"
+                >
+
+                    <div class="map-legend-header">
+
+                        <div>
+
+                            <h3 id="mapLegendHeading">
+                                Map layers
+                            </h3>
+
+                            <p>
+                                Select which amenities to display.
+                            </p>
+
+                        </div>
+
+                        <button
+                            type="button"
+                            class="map-legend-reset"
+                            id="mapLegendShowAll"
+                        >
+                            Show all
+                        </button>
+
+                    </div>
+
+                    <div class="map-legend-options">
+
+                        <!-- Selected HDB Block -->
+                        <div class="map-legend-fixed">
+
+                            <span
+                                class="map-legend-dot"
+                                style="background-color: #102B3F;"
+                                aria-hidden="true"
+                            ></span>
+
+                            <span>
+                                Selected HDB block
+                            </span>
+
+                        </div>
+
+                        <!-- MRT -->
+                        <label class="map-legend-option">
+
+                            <input
+                                type="checkbox"
+                                data-map-category="mrt_exits"
+                                checked
+                            >
+
+                            <span
+                                class="map-legend-dot"
+                                style="background-color: #8B5CF6;"
+                                aria-hidden="true"
+                            ></span>
+
+                            <span>MRT exits</span>
+
+                        </label>
+
+                        <!-- BUS -->
+                        <label class="map-legend-option">
+
+                            <input
+                                type="checkbox"
+                                data-map-category="bus_stops"
+                                checked
+                            >
+
+                            <span
+                                class="map-legend-dot"
+                                style="background-color: #2563EB;"
+                                aria-hidden="true"
+                            ></span>
+
+                            <span>Bus stops</span>
+
+                        </label>
+
+                        <!-- HAWKER -->
+                        <label class="map-legend-option">
+
+                            <input
+                                type="checkbox"
+                                data-map-category="hawker_centres"
+                                checked
+                            >
+
+                            <span
+                                class="map-legend-dot"
+                                style="background-color: #F59E0B;"
+                                aria-hidden="true"
+                            ></span>
+
+                            <span>Hawker centres</span>
+
+                        </label>
+
+                        <!-- CHILDCARE -->
+                        <label class="map-legend-option">
+
+                            <input
+                                type="checkbox"
+                                data-map-category="childcare_centres"
+                                checked
+                            >
+
+                            <span
+                                class="map-legend-dot"
+                                style="background-color: #EC4899;"
+                                aria-hidden="true"
+                            ></span>
+
+                            <span>Childcare centres</span>
+
+                        </label>
+
+                        <!-- PARKS -->
+                        <label class="map-legend-option">
+
+                            <input
+                                type="checkbox"
+                                data-map-category="parks"
+                                checked
+                            >
+
+                            <span
+                                class="map-legend-dot"
+                                style="background-color: #16A34A;"
+                                aria-hidden="true"
+                            ></span>
+
+                            <span>Parks</span>
+
+                        </label>
+
+                    </div>
+
+                    <p
+                        class="map-legend-status"
+                        id="mapLegendStatus"
+                        role="status"
+                        aria-live="polite"
+                    >
+                        Showing all five amenity categories.
+                    </p>
+
+                </div>
+
+                <!-- Leaflet Map -->
+                <div
+                    id="neighbourhoodMap"
+                    class="neighbourhood-map"
+                    role="region"
+                    aria-label="Interactive map of the HDB block and nearby amenities"
+                ></div>
+
+                <p class="map-distance-note">
+                    Amenity distances are approximate straight-line
+                    distances. Actual walking routes may differ.
+                </p>
+
+            </section>
+
+            <!-- ===================================== -->
+            <!-- RECENT RESALE TRANSACTIONS -->
+            <!-- ===================================== -->
+
             <section class="block-details-section">
+
                 <h2>Recent resale transactions</h2>
 
                 <p class="block-section-description">
@@ -76,32 +1118,55 @@
                     transactions for this block.
                 </p>
 
-                <div id="blockTransactions" class="results-container">
+                <div
+                    id="blockTransactions"
+                    class="results-container"
+                >
                     <p>Loading transactions...</p>
                 </div>
+
             </section>
 
+            <!-- ===================================== -->
+            <!-- BACK TO EXPLORE -->
+            <!-- ===================================== -->
+
             <div class="block-back-link">
-                <a href="explore.html">← Back to Explore HDB</a>
+
+                <a href="explore.html">
+                    ← Back to Explore HDB
+                </a>
+
             </div>
 
         </div>
+
     </main>
 
-    <!-- Footer -->
+    <!-- ===================================== -->
+    <!-- FOOTER -->
+    <!-- ===================================== -->
+
     <footer class="site-footer">
+
         <div class="footer-content">
+
             <a href="index.html" class="logo">
                 Haven<span>.</span>
             </a>
 
-            <p>Find your place. Know your neighbourhood.</p>
+            <p>
+                Find your place. Know your neighbourhood.
+            </p>
 
             <p class="footer-note">
                 Haven provides historical HDB resale information
-                for educational and informational purposes.
+                and neighbourhood proximity data for educational
+                and informational purposes.
             </p>
+
         </div>
+
     </footer>
 
 </body>

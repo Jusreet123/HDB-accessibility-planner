@@ -1,0 +1,470 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Market Insights | Haven.</title>
+
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Market Insights JavaScript -->
+    <script src="js/insights.js" defer></script>
+
+    <!-- Login / Profile Navigation -->
+    <script src="js/auth-nav.js" defer></script>
+</head>
+
+<body class="insights-page">
+
+    <!-- ======================================
+         1. NAVIGATION
+    ======================================= -->
+
+    <header class="navbar">
+
+        <a href="index.html" class="logo">
+            haven<span>.</span>
+        </a>
+
+        <nav aria-label="Main navigation">
+
+            <a href="index.html">
+                Home
+            </a>
+
+            <a href="explore.html">
+                Explore HDB
+            </a>
+
+            <a href="neighbourhoods.html">
+                Neighbourhoods
+            </a>
+
+            <a href="compare.html">
+                Compare
+            </a>
+
+            <a
+                href="insights.html"
+                aria-current="page"
+            >
+                Market Insights
+            </a>
+
+        </nav>
+
+        <!-- ======================================
+             AUTHENTICATION NAVIGATION
+        ======================================= -->
+
+        <div class="auth-nav" id="authNav">
+
+            <!-- Login button for guests -->
+            <a
+                href="login.html"
+                class="auth-login-btn"
+                id="loginNavBtn"
+                hidden
+            >
+                Login
+            </a>
+
+            <!-- Profile menu for logged-in users -->
+            <div
+                class="auth-user-menu"
+                id="userNavMenu"
+                hidden
+            >
+
+                <button
+                    type="button"
+                    class="profile-dropdown-toggle"
+                    id="profileDropdownToggle"
+                    aria-expanded="false"
+                    aria-controls="profileDropdown"
+                    aria-haspopup="true"
+                >
+
+                    <span
+                        class="profile-avatar"
+                        aria-hidden="true"
+                    >
+                        👤
+                    </span>
+
+                    <span id="navUsername">
+                        My Account
+                    </span>
+
+                    <span
+                        class="dropdown-arrow"
+                        aria-hidden="true"
+                    >
+                        ▾
+                    </span>
+
+                </button>
+
+                <!-- Profile Dropdown -->
+                <div
+                    class="profile-dropdown"
+                    id="profileDropdown"
+                    hidden
+                >
+
+                    <a
+                        href="wishlist.html"
+                        class="dropdown-item"
+                    >
+                        <span aria-hidden="true">♡</span>
+                        My Wishlist
+                    </a>
+
+                    <button
+                        type="button"
+                        id="logoutNavBtn"
+                        class="dropdown-item dropdown-logout"
+                    >
+                        <span aria-hidden="true">↪</span>
+                        Logout
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+    <main>
+
+        <!-- ======================================
+             2. PAGE INTRODUCTION
+        ======================================= -->
+
+        <section class="explore-intro">
+
+            <div class="explore-container">
+
+                <p class="eyebrow">
+                    HDB RESALE ANALYTICS
+                </p>
+
+                <h1>Market Insights</h1>
+
+                <p>
+                    Explore historical HDB resale prices,
+                    compare flat types, and discover
+                    market trends across Singapore.
+                </p>
+
+            </div>
+
+        </section>
+
+        <!-- ======================================
+             3. MARKET INSIGHTS FILTERS
+        ======================================= -->
+
+        <section class="explore-section insights-filters-section">
+
+            <div class="explore-container">
+
+                <h2>Explore Market Data</h2>
+
+                <p>
+                    Filter historical HDB resale transactions
+                    by town, flat type and year range.
+                </p>
+
+                <div class="filter-panel insights-filter-panel">
+
+                    <div class="insights-filter-grid">
+
+                        <!-- TOWN FILTER -->
+
+                        <div class="insights-filter-field">
+
+                            <label for="insightsTown">
+                                Town
+                            </label>
+
+                            <select id="insightsTown">
+
+                                <option value="">
+                                    All Towns
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <!-- FLAT TYPE FILTER -->
+
+                        <div class="insights-filter-field">
+
+                            <label for="insightsFlatType">
+                                Flat Type
+                            </label>
+
+                            <select id="insightsFlatType">
+
+                                <option value="">
+                                    All Flat Types
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <!-- START YEAR FILTER -->
+
+                        <div class="insights-filter-field">
+
+                            <label for="insightsStartYear">
+                                Start Year
+                            </label>
+
+                            <select id="insightsStartYear">
+
+                                <option value="">
+                                    All Years
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <!-- END YEAR FILTER -->
+
+                        <div class="insights-filter-field">
+
+                            <label for="insightsEndYear">
+                                End Year
+                            </label>
+
+                            <select id="insightsEndYear">
+
+                                <option value="">
+                                    All Years
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                    <!-- FILTER ACTION BUTTONS -->
+
+                    <div class="insights-filter-actions">
+
+                        <button
+                            type="button"
+                            id="insightsApply"
+                            class="primary-button"
+                        >
+                            Apply Filters
+                        </button>
+
+                        <button
+                            type="button"
+                            id="insightsReset"
+                        >
+                            Reset Filters
+                        </button>
+
+                    </div>
+
+                    <!-- FILTER STATUS -->
+
+                    <p
+                        id="insightsFilterStatus"
+                        role="status"
+                        aria-live="polite"
+                    ></p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ======================================
+             4. MARKET OVERVIEW
+        ======================================= -->
+
+        <section class="explore-section">
+
+            <div class="explore-container">
+
+                <h2>Market Overview</h2>
+
+                <p>
+                    A snapshot of recorded HDB resale
+                    transactions and resale prices.
+                </p>
+
+                <p
+                    id="insightsStatus"
+                    role="status"
+                    aria-live="polite"
+                >
+                    Loading market statistics...
+                </p>
+
+                <div
+                    id="marketOverview"
+                    class="insights-stat-grid"
+                ></div>
+
+            </div>
+
+        </section>
+
+        <!-- ======================================
+             5. HISTORICAL RESALE PRICE TRENDS
+        ======================================= -->
+
+        <section class="explore-section">
+
+            <div class="explore-container">
+
+                <h2>
+                    Historical Resale Price Trends
+                </h2>
+
+                <p>
+                    Explore average HDB resale prices
+                    across recorded transactions,
+                    grouped by year.
+                </p>
+
+                <div class="insights-chart-card">
+
+                    <div class="insights-chart-container">
+
+                        <canvas
+                            id="priceTrendsChart"
+                            aria-label="Historical average HDB resale prices by year"
+                            role="img"
+                        ></canvas>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ======================================
+             6. FLAT-TYPE COMPARISON
+        ======================================= -->
+
+        <section class="explore-section">
+
+            <div class="explore-container">
+
+                <h2>
+                    Resale Prices by Flat Type
+                </h2>
+
+                <p>
+                    Compare average recorded resale prices
+                    across different HDB flat types.
+                </p>
+
+                <!-- FLAT TYPE CHART -->
+
+                <div class="insights-chart-card">
+
+                    <div class="insights-chart-container">
+
+                        <canvas
+                            id="flatTypeChart"
+                            aria-label="Average HDB resale prices by flat type"
+                            role="img"
+                        ></canvas>
+
+                    </div>
+
+                </div>
+
+                <!-- FLAT TYPE TABLE -->
+
+                <div
+                    id="flatTypeTable"
+                    class="insights-table-container"
+                ></div>
+
+            </div>
+
+        </section>
+
+        <!-- ======================================
+             7. TOWN PRICE RANKINGS
+        ======================================= -->
+
+        <section class="explore-section">
+
+            <div class="explore-container">
+
+                <h2>Town Price Rankings</h2>
+
+                <p>
+                    Compare towns by average recorded
+                    HDB resale prices.
+                </p>
+
+                <p>
+                    Town rankings remain available
+                    across all towns, even when a
+                    specific town is selected above.
+                    Flat-type and year filters still apply.
+                </p>
+
+                <!-- TOWN RANKINGS CHART -->
+
+                <div class="insights-chart-card">
+
+                    <div class="insights-chart-container">
+
+                        <canvas
+                            id="townRankingsChart"
+                            aria-label="Top ten HDB towns ranked by average resale price"
+                            role="img"
+                        ></canvas>
+
+                    </div>
+
+                </div>
+
+                <!-- TOWN RANKINGS TABLE -->
+
+                <div
+                    id="townRankingsTable"
+                    class="insights-table-container"
+                ></div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>

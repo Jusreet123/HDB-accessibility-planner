@@ -1,6 +1,7 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,37 +9,151 @@
     <title>Explore HDB | Haven.</title>
 
     <link rel="stylesheet" href="css/style.css">
+
+    <!-- Explore HDB functionality -->
     <script src="js/explore.js" defer></script>
+
+    <!-- Login and profile navigation -->
+    <script src="js/auth-nav.js" defer></script>
 </head>
 
 <body>
 
-    <!-- Navigation -->
+    <!-- =========================================
+         NAVIGATION
+    ========================================= -->
+
     <header class="navbar">
+
         <a href="index.html" class="logo">
             haven<span>.</span>
         </a>
 
         <nav aria-label="Main navigation">
+
             <a href="index.html">Home</a>
-            <a href="explore.html" aria-current="page">Explore HDB</a>
-            <a href="#">Neighbourhoods</a>
-            <a href="#">Compare</a>
-            <a href="#">Market Insights</a>
+
+            <a href="explore.html" aria-current="page">
+                Explore HDB
+            </a>
+
+            <a href="neighbourhoods.html">Neighbourhoods</a>
+
+            <a href="compare.html">
+                Compare
+            </a>
+
+            <a href="insights.html">
+                Market Insights
+            </a>
+
         </nav>
+
+        <!-- =========================================
+             AUTHENTICATION NAVIGATION
+        ========================================= -->
+
+        <div class="auth-nav" id="authNav">
+
+            <!-- Guest login -->
+            <a
+                href="login.html"
+                class="auth-login-btn"
+                id="loginNavBtn"
+                hidden
+            >
+                Login
+            </a>
+
+            <!-- Logged-in user menu -->
+            <div
+                class="auth-user-menu"
+                id="userNavMenu"
+                hidden
+            >
+
+                <button
+                    type="button"
+                    class="profile-dropdown-toggle"
+                    id="profileDropdownToggle"
+                    aria-expanded="false"
+                    aria-controls="profileDropdown"
+                    aria-haspopup="true"
+                >
+
+                    <span
+                        class="profile-avatar"
+                        aria-hidden="true"
+                    >
+                        👤
+                    </span>
+
+                    <span id="navUsername">
+                        My Account
+                    </span>
+
+                    <span
+                        class="dropdown-arrow"
+                        aria-hidden="true"
+                    >
+                        ▾
+                    </span>
+
+                </button>
+
+                <!-- Profile dropdown -->
+                <div
+                    class="profile-dropdown"
+                    id="profileDropdown"
+                    hidden
+                >
+
+                    <a
+                        href="wishlist.html"
+                        class="dropdown-item"
+                    >
+                        <span aria-hidden="true">♡</span>
+                        My Wishlist
+                    </a>
+
+                    <button
+                        type="button"
+                        id="logoutNavBtn"
+                        class="dropdown-item dropdown-logout"
+                    >
+                        <span aria-hidden="true">↪</span>
+                        Logout
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
     </header>
+
+    <!-- =========================================
+         MAIN CONTENT
+    ========================================= -->
 
     <main>
 
-        <!-- Page Introduction -->
+        <!-- =========================================
+             PAGE INTRODUCTION
+        ========================================= -->
+
         <section class="explore-intro">
+
             <div class="explore-intro-content">
 
                 <p class="eyebrow">
                     DISCOVER YOUR NEXT NEIGHBOURHOOD
                 </p>
 
-                <h1>Explore HDB resale history.</h1>
+                <h1>
+                    Explore HDB resale history.
+                </h1>
 
                 <p>
                     Search Singapore's HDB blocks, explore historical
@@ -47,37 +162,36 @@
                 </p>
 
             </div>
+
         </section>
 
-        <!-- Search and Filters -->
+        <!-- =========================================
+             SEARCH AND FILTERS
+        ========================================= -->
+
         <section class="explore-section">
 
             <div class="explore-container">
 
+                <!-- =================================
+                     FILTER PANEL
+                ================================= -->
+
                 <div class="filter-panel">
 
                     <div class="filter-heading">
-                        <h2>Find an HDB block</h2>
-                        <p>Refine your search using the filters below.</p>
+
+                        <h2>
+                            Find an HDB block
+                        </h2>
+
+                        <p>
+                            Refine your search using the filters below.
+                        </p>
+
                     </div>
 
                     <form id="exploreForm">
-
-                        <!-- Location Search -->
-                        <div class="filter-search">
-
-                            <label for="blockSearch">
-                                Search location
-                            </label>
-
-                            <input
-                                type="search"
-                                id="blockSearch"
-                                name="search"
-                                placeholder="Enter town, street or block number"
-                            >
-
-                        </div>
 
                         <!-- Filter Fields -->
                         <div class="filter-grid">
@@ -85,9 +199,14 @@
                             <!-- Town -->
                             <div class="filter-field">
 
-                                <label for="townFilter">Town</label>
+                                <label for="townFilter">
+                                    Town
+                                </label>
 
-                                <select id="townFilter" name="town">
+                                <select
+                                    id="townFilter"
+                                    name="town"
+                                >
                                     <option value="">All towns</option>
                                     <option value="ANG MO KIO">Ang Mo Kio</option>
                                     <option value="BEDOK">Bedok</option>
@@ -119,9 +238,14 @@
                             <!-- Flat Type -->
                             <div class="filter-field">
 
-                                <label for="flatTypeFilter">Flat type</label>
+                                <label for="flatTypeFilter">
+                                    Flat type
+                                </label>
 
-                                <select id="flatTypeFilter" name="flatType">
+                                <select
+                                    id="flatTypeFilter"
+                                    name="flatType"
+                                >
                                     <option value="">All flat types</option>
                                     <option value="1 ROOM">1 Room</option>
                                     <option value="2 ROOM">2 Room</option>
@@ -195,19 +319,27 @@
 
                 </div>
 
-                <!-- Results -->
+                <!-- =================================
+                     HDB SEARCH RESULTS
+                ================================= -->
+
                 <div class="results-section">
 
                     <div class="results-header">
 
                         <div>
-                            <h2>HDB block results</h2>
+
+                            <h2>
+                                HDB block results
+                            </h2>
 
                             <p id="resultsCount">
                                 Search results will appear here.
                             </p>
+
                         </div>
 
+                        <!-- Sorting -->
                         <div class="sort-field">
 
                             <label for="sortResults">
@@ -215,6 +347,7 @@
                             </label>
 
                             <select id="sortResults">
+
                                 <option value="latest">
                                     Latest transaction
                                 </option>
@@ -226,18 +359,23 @@
                                 <option value="price-high">
                                     Price: High to low
                                 </option>
+
                             </select>
 
                         </div>
 
                     </div>
 
-                    <!-- Database results will appear here -->
+                    <!-- =================================
+                         DYNAMIC RESULT CARDS
+                    ================================= -->
+
                     <div
                         id="resultsContainer"
                         class="results-container"
                     >
 
+                        <!-- Initial empty state -->
                         <div class="empty-results">
 
                             <div class="empty-results-icon">
@@ -257,7 +395,10 @@
 
                     </div>
 
-                    <!-- Pagination -->
+                    <!-- =================================
+                         PAGINATION
+                    ================================= -->
+
                     <div
                         id="pagination"
                         class="pagination"
@@ -272,7 +413,10 @@
 
     </main>
 
-    <!-- Footer -->
+    <!-- =========================================
+         FOOTER
+    ========================================= -->
+
     <footer class="site-footer">
 
         <div class="footer-content">

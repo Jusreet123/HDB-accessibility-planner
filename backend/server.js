@@ -2,6 +2,16 @@
 const express = require("express");
 const path = require("path");
 const pool = require("./db");
+const { connectMongoDB, getMongoDB } = require("./mongo");
+
+const amenitiesRouter = require("./routes/amenities");
+const townsRouter = require("./routes/towns");
+const insightsRouter = require("./routes/insights");
+const authRouter = require("./routes/auth");
+const wishlistRouter = require("./routes/wishlist");
+
+const sessionMiddleware = require("./session");
+const passport = require("./googleAuth");
 
 require("dotenv").config({
     path: path.join(__dirname, ".env")
@@ -16,6 +26,19 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
+// Enable user sessions
+app.use(sessionMiddleware);
+
+// Initialize Google Passport authentication
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Haven authentication routes
+app.use("/auth", authRouter);
+
+// Authenticated HDB wishlist CRUD routes
+app.use("/api/wishlist", wishlistRouter);
+
 // Serve Haven frontend
 const frontendPath = path.join(__dirname, "../frontend");
 app.use(express.static(frontendPath));
@@ -29,7 +52,7 @@ app.get("/", (req, res) => {
 });
 
 // ==========================================
-// 3. HEALTH CHECK API
+// 3. MYSQL HEALTH CHECK API
 // ==========================================
 
 app.get("/api/health", async (req, res) => {
@@ -53,8 +76,49 @@ app.get("/api/health", async (req, res) => {
 });
 
 // ==========================================
-// 4. HDB TOWNS API
+// 4. MONGODB HEALTH CHECK API
 // ==========================================
+
+app.get("/api/mongodb/health", async (req, res) => {
+    if (!process.env.MONGO_URI) {
+        return res.status(503).json({
+            status: "unavailable",
+            message: "MongoDB URI is not configured"
+        });
+    }
+
+    try {
+        const mongoDb = getMongoDB();
+        await mongoDb.command({ ping: 1 });
+
+        res.json({
+            status: "success",
+            message: "Connected to MongoDB Atlas",
+            database: "hdb"
+        });
+
+    } catch (error) {
+        console.error(
+            "MongoDB health check failed:",
+            error.message
+        );
+
+        res.status(503).json({
+            status: "error",
+            message: "MongoDB connection unavailable"
+        });
+    }
+});
+
+// ==========================================
+// 5. HDB TOWNS API
+// ==========================================
+
+// Town statistics from backend/routes/towns.js
+app.use("/api/towns", townsRouter);
+
+// Market Insights from backend/routes/insights.js
+app.use("/api/insights", insightsRouter);
 
 app.get("/api/towns", async (req, res) => {
     try {
@@ -79,7 +143,7 @@ app.get("/api/towns", async (req, res) => {
 });
 
 // ==========================================
-// 5. HDB RESALE SEARCH API
+// 6. HDB RESALE SEARCH API
 // ==========================================
 
 app.get("/api/resale", async (req, res) => {
@@ -98,7 +162,6 @@ app.get("/api/resale", async (req, res) => {
         const min = minPrice === "" ? null : Number(minPrice);
         const max = maxPrice === "" ? null : Number(maxPrice);
 
-        // Validate page number and price range
         if (
             !Number.isSafeInteger(pageNumber) ||
             pageNumber < 1 ||
@@ -118,7 +181,6 @@ app.get("/api/resale", async (req, res) => {
         const conditions = [];
         const params = [];
 
-        // Search by block address or town
         const keyword = String(search).trim();
 
         if (keyword) {
@@ -126,28 +188,27 @@ app.get("/api/resale", async (req, res) => {
                 "(CONCAT(b.blk_no, ' ', b.street_name) LIKE ? OR t.town_name LIKE ?)"
             );
 
-            params.push(`%${keyword}%`, `%${keyword}%`);
+            params.push(
+                `%${keyword}%`,
+                `%${keyword}%`
+            );
         }
 
-        // Filter by town
         if (town) {
             conditions.push("t.town_name = ?");
             params.push(town);
         }
 
-        // Filter by flat type
         if (flatType) {
             conditions.push("ft.flat_type_name = ?");
             params.push(flatType);
         }
 
-        // Filter by minimum resale price
         if (min !== null) {
             conditions.push("r.resale_price >= ?");
             params.push(min);
         }
 
-        // Filter by maximum resale price
         if (max !== null) {
             conditions.push("r.resale_price <= ?");
             params.push(max);
@@ -157,7 +218,6 @@ app.get("/api/resale", async (req, res) => {
             ? `WHERE ${conditions.join(" AND ")}`
             : "";
 
-        // Allowed sorting options
         const sortOptions = {
             newest: "r.sale_date DESC, r.transaction_id DESC",
             oldest: "r.sale_date ASC, r.transaction_id ASC",
@@ -165,9 +225,9 @@ app.get("/api/resale", async (req, res) => {
             priceHigh: "r.resale_price DESC, r.transaction_id DESC"
         };
 
-        const orderBy = sortOptions[sort] || sortOptions.newest;
+        const orderBy =
+            sortOptions[sort] || sortOptions.newest;
 
-        // Join resale records with blocks, towns and flat types
         const joins = `
             FROM resale_transaction r
             INNER JOIN block b
@@ -178,17 +238,19 @@ app.get("/api/resale", async (req, res) => {
                 ON r.flat_type_id = ft.flat_type_id
         `;
 
-        // Count matching transactions
         const countSql = `
             SELECT COUNT(*) AS total
             ${joins}
             ${whereClause}
         `;
 
-        const [countRows] = await pool.query(countSql, params);
+        const [countRows] = await pool.query(
+            countSql,
+            params
+        );
+
         const total = countRows[0].total;
 
-        // Retrieve matching resale transactions
         const dataSql = `
             SELECT
                 r.transaction_id,
@@ -238,22 +300,99 @@ app.get("/api/resale", async (req, res) => {
 });
 
 // ==========================================
-// 6. HDB BLOCK DETAILS API
+// 7. HDB BLOCK SEARCH API
+// ==========================================
+
+// Example:
+// GET /api/blocks?search=ang%20mo%20kio
+// GET /api/blocks?search=123
+// GET /api/blocks?search=560123
+
+app.get("/api/blocks", async (req, res) => {
+    try {
+        const search = String(
+            req.query.search || ""
+        ).trim();
+
+        if (search.length > 100) {
+            return res.status(400).json({
+                status: "error",
+                message: "Search term is too long"
+            });
+        }
+
+        const keyword = `%${search}%`;
+
+        const [rows] = await pool.query(
+            `
+            SELECT
+                b.block_id,
+                b.blk_no,
+                b.street_name,
+                b.postal,
+                t.town_name
+            FROM block b
+            INNER JOIN town t
+                ON b.town_id = t.town_id
+            WHERE
+                CONCAT(
+                    b.blk_no,
+                    ' ',
+                    b.street_name
+                ) LIKE ?
+                OR t.town_name LIKE ?
+                OR b.postal LIKE ?
+            ORDER BY
+                t.town_name,
+                b.street_name,
+                b.blk_no
+            LIMIT 50
+            `,
+            [
+                keyword,
+                keyword,
+                keyword
+            ]
+        );
+
+        res.json({
+            status: "success",
+            count: rows.length,
+            data: rows
+        });
+
+    } catch (error) {
+        console.error(
+            "Block search failed:",
+            error.code,
+            error.message
+        );
+
+        res.status(500).json({
+            status: "error",
+            message: "Unable to search HDB blocks"
+        });
+    }
+});
+
+// ==========================================
+// 8. HDB BLOCK DETAILS API
 // ==========================================
 
 app.get("/api/blocks/:blockId", async (req, res) => {
     try {
         const blockId = Number(req.params.blockId);
 
-        // Validate block ID
-        if (!Number.isSafeInteger(blockId) || blockId <= 0) {
+        if (
+            !Number.isSafeInteger(blockId) ||
+            blockId <= 0
+        ) {
             return res.status(400).json({
                 status: "error",
                 message: "Invalid block ID"
             });
         }
 
-        // Retrieve block information
         const [blocks] = await pool.query(
             `
             SELECT
@@ -280,7 +419,6 @@ app.get("/api/blocks/:blockId", async (req, res) => {
             });
         }
 
-        // Retrieve historical resale statistics
         const [statistics] = await pool.query(
             `
             SELECT
@@ -294,7 +432,6 @@ app.get("/api/blocks/:blockId", async (req, res) => {
             [blockId]
         );
 
-        // Retrieve 20 most recent resale transactions
         const [transactions] = await pool.query(
             `
             SELECT
@@ -338,16 +475,214 @@ app.get("/api/blocks/:blockId", async (req, res) => {
 });
 
 // ==========================================
-// 7. START HAVEN SERVER
+// 9. MONGODB COLLECTIONS CHECK API
+// ==========================================
+
+app.get("/api/mongodb/collections", async (req, res) => {
+    try {
+        const mongoDb = getMongoDB();
+
+        const collectionNames = [
+            "childcare_centres",
+            "hawker_centres",
+            "bus_stops",
+            "mrt_exits",
+            "parks",
+            "blocks"
+        ];
+
+        const collections = await Promise.all(
+            collectionNames.map(async (name) => ({
+                name,
+                count: await mongoDb
+                    .collection(name)
+                    .countDocuments({})
+            }))
+        );
+
+        res.json({
+            status: "success",
+            database: "hdb",
+            collections
+        });
+
+    } catch (error) {
+        console.error(
+            "MongoDB collections check failed:",
+            error.message
+        );
+
+        res.status(503).json({
+            status: "error",
+            message: "Unable to retrieve MongoDB collections"
+        });
+    }
+});
+
+// ==========================================
+// 10. NEARBY AMENITIES API
+// ==========================================
+
+// Routes from backend/routes/amenities.js
+// Example:
+// GET /api/blocks/1715/amenities?radius=500
+
+app.use("/api/blocks", amenitiesRouter);
+
+// ==========================================
+// 11. TEMPORARY BUS STOP DATA INSPECTION
+// ==========================================
+
+// DEVELOPMENT ONLY
+// Remove this endpoint after inspecting the data.
+// Restricted to requests from the local machine.
+
+app.get("/api/debug/bus-stop-sample", async (req, res) => {
+
+    const remoteAddress = req.socket.remoteAddress || "";
+
+    const isLocal =
+        remoteAddress === "127.0.0.1" ||
+        remoteAddress === "::1" ||
+        remoteAddress === "::ffff:127.0.0.1";
+
+    if (!isLocal) {
+        return res.status(403).json({
+            status: "error",
+            message: "This debugging endpoint is only available locally"
+        });
+    }
+
+    try {
+        const mongoDb = getMongoDB();
+
+        const sample = await mongoDb
+            .collection("bus_stops")
+            .findOne(
+                {},
+                {
+                    projection: {
+                        _id: 0
+                    }
+                }
+            );
+
+        if (!sample) {
+            return res.status(404).json({
+                status: "error",
+                message: "No bus stop records found"
+            });
+        }
+
+        res.json({
+            status: "success",
+            sample
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Bus stop inspection failed:",
+            error.message
+        );
+
+        res.status(500).json({
+            status: "error",
+            message: "Unable to inspect bus stop data"
+        });
+    }
+});
+
+// ==========================================
+// 12. TEMPORARY HAWKER CENTRE DATA INSPECTION
+// ==========================================
+
+// DEVELOPMENT ONLY
+// Remove this endpoint after inspecting the data.
+// Restricted to requests from the local machine.
+
+app.get("/api/debug/hawker-sample", async (req, res) => {
+
+    const remoteAddress = req.socket.remoteAddress || "";
+
+    const isLocal =
+        remoteAddress === "127.0.0.1" ||
+        remoteAddress === "::1" ||
+        remoteAddress === "::ffff:127.0.0.1";
+
+    if (!isLocal) {
+        return res.status(403).json({
+            status: "error",
+            message: "This debugging endpoint is only available locally"
+        });
+    }
+
+    try {
+
+        const mongoDb = getMongoDB();
+
+        const sample = await mongoDb
+            .collection("hawker_centres")
+            .findOne(
+                {},
+                {
+                    projection: {
+                        _id: 0
+                    }
+                }
+            );
+
+        if (!sample) {
+            return res.status(404).json({
+                status: "error",
+                message: "No hawker centre records found"
+            });
+        }
+
+        return res.json({
+            status: "success",
+            sample
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Hawker centre inspection failed:",
+            error.message
+        );
+
+        return res.status(500).json({
+            status: "error",
+            message: "Unable to inspect hawker centre data"
+        });
+    }
+});
+
+// ==========================================
+// 13. START HAVEN SERVER
 // ==========================================
 
 app.listen(PORT, () => {
     console.log("-----------------------------------");
     console.log("Haven backend started successfully!");
     console.log(`Website: http://localhost:${PORT}`);
-    console.log(`Health: http://localhost:${PORT}/api/health`);
+    console.log(`MySQL Health: http://localhost:${PORT}/api/health`);
+    console.log(`MongoDB Health: http://localhost:${PORT}/api/mongodb/health`);
+    console.log(`MongoDB Collections: http://localhost:${PORT}/api/mongodb/collections`);
     console.log(`Towns: http://localhost:${PORT}/api/towns`);
     console.log(`Resale: http://localhost:${PORT}/api/resale`);
+    console.log(`Block Search: http://localhost:${PORT}/api/blocks?search=ang%20mo%20kio`);
     console.log(`Block Details: http://localhost:${PORT}/api/blocks/1715`);
+    console.log(`Nearby Amenities: http://localhost:${PORT}/api/blocks/1715/amenities?radius=500`);
+    console.log(`Wishlist: http://localhost:${PORT}/api/wishlist`);
+    console.log(`Bus Stop Sample: http://localhost:${PORT}/api/debug/bus-stop-sample`);
+    console.log(`Hawker Sample: http://localhost:${PORT}/api/debug/hawker-sample`);
     console.log("-----------------------------------");
+
+    connectMongoDB().catch((error) => {
+        console.error(
+            "Unexpected MongoDB startup error:",
+            error.message
+        );
+    });
 });

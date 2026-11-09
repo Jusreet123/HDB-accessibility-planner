@@ -1,0 +1,540 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Compare HDB | Haven.</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Leaflet CSS -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <!-- Leaflet JavaScript -->
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        defer
+    ></script>
+
+    <!-- Haven JavaScript -->
+    <script src="js/compare.js" defer></script>
+    <script src="js/auth-nav.js" defer></script>
+</head>
+
+<body class="compare-page">
+
+    <!-- ====================================== -->
+    <!-- NAVIGATION BAR -->
+    <!-- ====================================== -->
+
+    <header class="navbar">
+
+        <a href="index.html" class="logo">
+            haven<span>.</span>
+        </a>
+
+        <nav aria-label="Main navigation">
+            <a href="index.html">Home</a>
+            <a href="explore.html">Explore HDB</a>
+            <a href="neighbourhoods.html">Neighbourhoods</a>
+            <a href="compare.html" aria-current="page">Compare</a>
+            <a href="insights.html">Market Insights</a>
+        </nav>
+
+        <!-- Authentication Navigation -->
+        <div class="auth-nav" id="authNav">
+
+            <!-- Guest Login Button -->
+            <a
+                href="login.html"
+                class="auth-login-btn"
+                id="loginNavBtn"
+                hidden
+            >
+                Login
+            </a>
+
+            <!-- Logged-in User Menu -->
+            <div
+                class="auth-user-menu"
+                id="userNavMenu"
+                hidden
+            >
+
+                <button
+                    type="button"
+                    class="profile-dropdown-toggle"
+                    id="profileDropdownToggle"
+                    aria-expanded="false"
+                    aria-controls="profileDropdown"
+                    aria-haspopup="true"
+                >
+                    <span
+                        class="profile-avatar"
+                        aria-hidden="true"
+                    >👤</span>
+
+                    <span id="navUsername">
+                        My Account
+                    </span>
+
+                    <span
+                        class="dropdown-arrow"
+                        aria-hidden="true"
+                    >▾</span>
+                </button>
+
+                <!-- Profile Dropdown -->
+                <div
+                    class="profile-dropdown"
+                    id="profileDropdown"
+                    hidden
+                >
+
+                    <a
+                        href="wishlist.html"
+                        class="dropdown-item"
+                    >
+                        <span aria-hidden="true">♡</span>
+                        My Wishlist
+                    </a>
+
+                    <button
+                        type="button"
+                        id="logoutNavBtn"
+                        class="dropdown-item dropdown-logout"
+                    >
+                        <span aria-hidden="true">↪</span>
+                        Logout
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+    <!-- ====================================== -->
+    <!-- MAIN CONTENT -->
+    <!-- ====================================== -->
+
+    <main>
+
+        <!-- ================================== -->
+        <!-- INTRODUCTION -->
+        <!-- ================================== -->
+
+        <section class="explore-intro">
+
+            <div class="explore-intro-content">
+
+                <p class="eyebrow">
+                    FIND YOUR IDEAL NEIGHBOURHOOD
+                </p>
+
+                <h1>Compare HDB blocks.</h1>
+
+                <p>
+                    Compare two HDB blocks side by side.
+                    Explore resale prices, nearby amenities
+                    and accessibility scores to discover which
+                    location best matches your priorities.
+                </p>
+
+            </div>
+
+        </section>
+
+        <!-- ================================== -->
+        <!-- BLOCK SELECTION -->
+        <!-- ================================== -->
+
+        <section class="explore-section">
+
+            <div class="explore-container">
+
+                <div class="filter-panel">
+
+                    <div class="filter-heading">
+
+                        <h2>Select two HDB blocks</h2>
+
+                        <p>
+                            Search by block number, street name,
+                            town or postal code.
+                        </p>
+
+                    </div>
+
+                    <!-- Search Fields -->
+                    <div class="filter-grid">
+
+                        <!-- ====================== -->
+                        <!-- BLOCK A -->
+                        <!-- ====================== -->
+
+                        <div class="filter-field">
+
+                            <label for="compareSearchA">
+                                HDB Block A
+                            </label>
+
+                            <input
+                                type="search"
+                                id="compareSearchA"
+                                placeholder="Search first HDB block"
+                                autocomplete="off"
+                                aria-controls="compareResultsA"
+                                aria-expanded="false"
+                            >
+
+                            <!-- Block A Search Results -->
+                            <div
+                                id="compareResultsA"
+                                class="compare-search-results"
+                                aria-label="Block A search results"
+                            ></div>
+
+                            <!-- Selected Block A -->
+                            <p
+                                id="compareSelectedA"
+                                class="compare-selected-block"
+                                aria-live="polite"
+                            >
+                                No block selected.
+                            </p>
+
+                        </div>
+
+                        <!-- ====================== -->
+                        <!-- BLOCK B -->
+                        <!-- ====================== -->
+
+                        <div class="filter-field">
+
+                            <label for="compareSearchB">
+                                HDB Block B
+                            </label>
+
+                            <input
+                                type="search"
+                                id="compareSearchB"
+                                placeholder="Search second HDB block"
+                                autocomplete="off"
+                                aria-controls="compareResultsB"
+                                aria-expanded="false"
+                            >
+
+                            <!-- Block B Search Results -->
+                            <div
+                                id="compareResultsB"
+                                class="compare-search-results"
+                                aria-label="Block B search results"
+                            ></div>
+
+                            <!-- Selected Block B -->
+                            <p
+                                id="compareSelectedB"
+                                class="compare-selected-block"
+                                aria-live="polite"
+                            >
+                                No block selected.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ================================== -->
+                    <!-- SELECTION ACTION BUTTONS -->
+                    <!-- ================================== -->
+
+                    <div class="filter-actions">
+
+                        <button
+                            type="button"
+                            id="compareReset"
+                            class="reset-button"
+                        >
+                            Clear selections
+                        </button>
+
+                        <button
+                            type="button"
+                            id="compareButton"
+                            class="primary-button"
+                            disabled
+                        >
+                            Compare blocks
+                        </button>
+
+                    </div>
+
+                    <!-- Selection Status -->
+                    <p
+                        id="compareSelectionStatus"
+                        aria-live="polite"
+                    >
+                        Select two different HDB blocks to begin.
+                    </p>
+
+                </div>
+
+                <!-- ================================== -->
+                <!-- COMPARISON RESULTS -->
+                <!-- ================================== -->
+
+                <div class="results-section">
+
+                    <div class="results-header">
+
+                        <div>
+
+                            <h2>Comparison results</h2>
+
+                            <p id="compareStatus">
+                                Your comparison will appear here.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Dynamic Comparison Results -->
+                    <div
+                        id="comparisonResults"
+                        class="results-container"
+                    >
+
+                        <div class="empty-results">
+
+                            <div class="empty-results-icon">
+                                ⌂
+                            </div>
+
+                            <h3>
+                                Your comparison starts here
+                            </h3>
+
+                            <p>
+                                Choose two different HDB blocks
+                                to compare their resale history,
+                                nearby amenities and accessibility.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ================================== -->
+                    <!-- INTERACTIVE COMPARISON MAP -->
+                    <!-- ================================== -->
+
+                    <section
+                        id="compareMapSection"
+                        class="compare-map-section"
+                        hidden
+                    >
+
+                        <!-- Map Heading -->
+                        <div class="compare-map-heading">
+
+                            <div>
+
+                                <h2>
+                                    HDB Location Comparison
+                                </h2>
+
+                                <p>
+                                    Explore both HDB blocks and
+                                    their nearby amenities on an
+                                    interactive map.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        <!-- ================================== -->
+                        <!-- MAP LEGEND -->
+                        <!-- ================================== -->
+
+                        <div class="compare-map-legend">
+
+                            <!-- Block Legend -->
+                            <div class="compare-map-block-legend">
+
+                                <span>
+
+                                    <span
+                                        class="compare-map-dot block-a"
+                                    ></span>
+
+                                    Block A
+
+                                </span>
+
+                                <span>
+
+                                    <span
+                                        class="compare-map-dot block-b"
+                                    ></span>
+
+                                    Block B
+
+                                </span>
+
+                            </div>
+
+                            <!-- Amenity Category Filters -->
+                            <div class="compare-map-category-legend">
+
+                                <!-- MRT -->
+                                <label>
+
+                                    <input
+                                        type="checkbox"
+                                        data-compare-map-category="mrt_exits"
+                                        checked
+                                    >
+
+                                    MRT exits
+
+                                </label>
+
+                                <!-- BUS STOPS -->
+                                <label>
+
+                                    <input
+                                        type="checkbox"
+                                        data-compare-map-category="bus_stops"
+                                        checked
+                                    >
+
+                                    Bus stops
+
+                                </label>
+
+                                <!-- HAWKER CENTRES -->
+                                <label>
+
+                                    <input
+                                        type="checkbox"
+                                        data-compare-map-category="hawker_centres"
+                                        checked
+                                    >
+
+                                    Hawker centres
+
+                                </label>
+
+                                <!-- CHILDCARE CENTRES -->
+                                <label>
+
+                                    <input
+                                        type="checkbox"
+                                        data-compare-map-category="childcare_centres"
+                                        checked
+                                    >
+
+                                    Childcare centres
+
+                                </label>
+
+                                <!-- PARKS -->
+                                <label>
+
+                                    <input
+                                        type="checkbox"
+                                        data-compare-map-category="parks"
+                                        checked
+                                    >
+
+                                    Parks
+
+                                </label>
+
+                            </div>
+
+                            <!-- Show All Amenities -->
+                            <button
+                                type="button"
+                                id="compareMapShowAll"
+                                class="reset-button"
+                            >
+                                Show all amenities
+                            </button>
+
+                        </div>
+
+                        <!-- ================================== -->
+                        <!-- LEAFLET MAP -->
+                        <!-- ================================== -->
+
+                        <div
+                            id="compareMap"
+                            class="compare-map"
+                            role="region"
+                            aria-label="Map comparing two HDB blocks"
+                        ></div>
+
+                        <!-- Map Status -->
+                        <p
+                            id="compareMapStatus"
+                            class="compare-map-status"
+                            aria-live="polite"
+                        >
+                            Map will appear after comparing two HDB blocks.
+                        </p>
+
+                        <!-- Map Disclaimer -->
+                        <p class="compare-map-note">
+                            Distances are measured in straight lines,
+                            not actual walking routes.
+                        </p>
+
+                    </section>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- ====================================== -->
+    <!-- FOOTER -->
+    <!-- ====================================== -->
+
+    <footer class="site-footer">
+
+        <div class="footer-content">
+
+            <a href="index.html" class="logo">
+                haven<span>.</span>
+            </a>
+
+            <p>
+                Find your place. Know your neighbourhood.
+            </p>
+
+            <p class="footer-note">
+                Historical HDB resale information for research
+                and exploration purposes. Not an active
+                property listing service.
+            </p>
+
+        </div>
+
+    </footer>
+
+</body>
+</html>

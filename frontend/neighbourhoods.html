@@ -1,0 +1,354 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Neighbourhoods | Haven.</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Neighbourhoods functionality -->
+    <script src="js/neighbourhoods.js" defer></script>
+
+    <!-- Login and profile navigation -->
+    <script src="js/auth-nav.js" defer></script>
+</head>
+
+<body class="neighbourhoods-page">
+
+    <!-- =========================================
+         NAVIGATION
+    ========================================= -->
+
+    <header class="navbar">
+
+        <a href="index.html" class="logo">
+            haven<span>.</span>
+        </a>
+
+        <nav aria-label="Main navigation">
+
+            <a href="index.html">Home</a>
+
+            <a href="explore.html">
+                Explore HDB
+            </a>
+
+            <a
+                href="neighbourhoods.html"
+                aria-current="page"
+            >
+                Neighbourhoods
+            </a>
+
+            <a href="compare.html">
+                Compare
+            </a>
+
+            <a href="insights.html">
+                Market Insights
+            </a>
+
+        </nav>
+
+        <!-- =========================================
+             AUTHENTICATION NAVIGATION
+        ========================================= -->
+
+        <div class="auth-nav" id="authNav">
+
+            <!-- Guest login -->
+            <a
+                href="login.html"
+                class="auth-login-btn"
+                id="loginNavBtn"
+                hidden
+            >
+                Login
+            </a>
+
+            <!-- Logged-in user menu -->
+            <div
+                class="auth-user-menu"
+                id="userNavMenu"
+                hidden
+            >
+
+                <button
+                    type="button"
+                    class="profile-dropdown-toggle"
+                    id="profileDropdownToggle"
+                    aria-expanded="false"
+                    aria-controls="profileDropdown"
+                    aria-haspopup="true"
+                >
+
+                    <span
+                        class="profile-avatar"
+                        aria-hidden="true"
+                    >
+                        👤
+                    </span>
+
+                    <span id="navUsername">
+                        My Account
+                    </span>
+
+                    <span
+                        class="dropdown-arrow"
+                        aria-hidden="true"
+                    >
+                        ▾
+                    </span>
+
+                </button>
+
+                <!-- Profile dropdown -->
+                <div
+                    class="profile-dropdown"
+                    id="profileDropdown"
+                    hidden
+                >
+
+                    <a
+                        href="wishlist.html"
+                        class="dropdown-item"
+                    >
+                        <span aria-hidden="true">♡</span>
+                        My Wishlist
+                    </a>
+
+                    <button
+                        type="button"
+                        id="logoutNavBtn"
+                        class="dropdown-item dropdown-logout"
+                    >
+                        <span aria-hidden="true">↪</span>
+                        Logout
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+    <!-- =========================================
+         MAIN CONTENT
+    ========================================= -->
+
+    <main>
+
+        <!-- =========================================
+             PAGE INTRODUCTION
+        ========================================= -->
+
+        <section class="explore-intro">
+
+            <div class="explore-intro-content">
+
+                <p class="eyebrow">
+                    EXPLORE SINGAPORE
+                </p>
+
+                <h1>
+                    Discover your neighbourhood.
+                </h1>
+
+                <p>
+                    Explore HDB towns across Singapore.
+                    Compare housing availability, resale
+                    activity and average resale prices
+                    to find a neighbourhood that suits you.
+                </p>
+
+            </div>
+
+        </section>
+
+        <!-- =========================================
+             NEIGHBOURHOOD DIRECTORY
+        ========================================= -->
+
+        <section class="explore-section">
+
+            <div class="explore-container">
+
+                <!-- =================================
+                     FILTER PANEL
+                ========================================= -->
+
+                <div class="filter-panel">
+
+                    <div class="filter-heading">
+
+                        <h2>
+                            Explore HDB towns
+                        </h2>
+
+                        <p>
+                            Search and sort neighbourhoods
+                            based on your preferences.
+                        </p>
+
+                    </div>
+
+                    <div class="filter-grid">
+
+                        <!-- Search neighbourhood -->
+                        <div class="filter-field">
+
+                            <label for="townSearch">
+                                Search neighbourhood
+                            </label>
+
+                            <input
+                                type="search"
+                                id="townSearch"
+                                placeholder="e.g. Ang Mo Kio, Clementi"
+                                autocomplete="off"
+                            >
+
+                        </div>
+
+                        <!-- Sort neighbourhoods -->
+                        <div class="filter-field">
+
+                            <label for="townSort">
+                                Sort by
+                            </label>
+
+                            <select id="townSort">
+
+                                <option value="name">
+                                    Town name (A–Z)
+                                </option>
+
+                                <option value="blocks">
+                                    Most HDB blocks
+                                </option>
+
+                                <option value="transactions">
+                                    Most resale transactions
+                                </option>
+
+                                <option value="priceLow">
+                                    Lowest average resale price
+                                </option>
+
+                                <option value="priceHigh">
+                                    Highest average resale price
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Reset filters -->
+                    <div class="filter-actions">
+
+                        <button
+                            type="button"
+                            id="townReset"
+                            class="reset-button"
+                        >
+                            Reset filters
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <!-- =================================
+                     TOWN RESULTS
+                ========================================= -->
+
+                <div class="results-section">
+
+                    <div class="results-header">
+
+                        <div>
+
+                            <h2>
+                                Singapore HDB towns
+                            </h2>
+
+                            <p
+                                id="townStatus"
+                                aria-live="polite"
+                            >
+                                Loading neighbourhood statistics...
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <!-- =================================
+                         DYNAMIC NEIGHBOURHOOD CARDS
+                    ========================================= -->
+
+                    <div
+                        id="townResults"
+                        class="neighbourhood-grid"
+                        aria-live="polite"
+                    >
+
+                        <div class="empty-results">
+
+                            <h3>
+                                Loading neighbourhoods...
+                            </h3>
+
+                            <p>
+                                Retrieving town statistics
+                                from the Haven database.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- =========================================
+         FOOTER
+    ========================================= -->
+
+    <footer class="site-footer">
+
+        <div class="footer-content">
+
+            <a href="index.html" class="logo">
+                haven<span>.</span>
+            </a>
+
+            <p>
+                Find your place. Know your neighbourhood.
+            </p>
+
+            <p class="footer-note">
+                Historical HDB resale information for
+                research and exploration purposes.
+                Not an active property listing service.
+            </p>
+
+        </div>
+
+    </footer>
+
+</body>
+</html>

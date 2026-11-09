@@ -1,0 +1,305 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Wishlist | Haven.</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- =========================================
+         NAVIGATION
+    ========================================= -->
+
+    <header class="navbar">
+
+        <!-- Logo -->
+        <a href="index.html" class="logo">
+            haven<span>.</span>
+        </a>
+
+        <!-- Main Navigation -->
+        <nav aria-label="Main navigation">
+
+            <a href="index.html">Home</a>
+
+            <a href="explore.html">Explore HDB</a>
+
+            <a href="#">Neighbourhoods</a>
+
+            <a href="compare.html">Compare</a>
+
+            <a href="insights.html">Market Insights</a>
+
+        </nav>
+
+        <!-- =========================================
+             AUTHENTICATION NAVIGATION
+        ========================================= -->
+
+        <div class="auth-nav" id="authNav">
+
+            <!-- Guest Navigation -->
+            <a
+                href="login.html"
+                class="auth-login-btn"
+                id="loginNavBtn"
+                hidden
+            >
+                Login
+            </a>
+
+            <!-- Logged-in User Navigation -->
+            <div
+                class="auth-user-menu"
+                id="userNavMenu"
+                hidden
+            >
+
+                <!-- Profile Dropdown Button -->
+                <button
+                    type="button"
+                    class="profile-dropdown-toggle"
+                    id="profileDropdownToggle"
+                    aria-expanded="false"
+                    aria-controls="profileDropdown"
+                    aria-haspopup="true"
+                >
+
+                    <span
+                        class="profile-avatar"
+                        aria-hidden="true"
+                    >
+                        👤
+                    </span>
+
+                    <span id="navUsername">
+                        My Account
+                    </span>
+
+                    <span
+                        class="dropdown-arrow"
+                        aria-hidden="true"
+                    >
+                        ▾
+                    </span>
+
+                </button>
+
+                <!-- Profile Dropdown Menu -->
+                <div
+                    class="profile-dropdown"
+                    id="profileDropdown"
+                    hidden
+                >
+
+                    <!-- Wishlist -->
+                    <a
+                        href="wishlist.html"
+                        class="dropdown-item"
+                        aria-current="page"
+                    >
+                        <span aria-hidden="true">♡</span>
+                        My Wishlist
+                    </a>
+
+                    <!-- Logout -->
+                    <button
+                        type="button"
+                        id="logoutNavBtn"
+                        class="dropdown-item dropdown-logout"
+                    >
+                        <span aria-hidden="true">↪</span>
+                        Logout
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+    <!-- =========================================
+         MAIN CONTENT
+    ========================================= -->
+
+    <main class="wishlist-page">
+
+        <!-- =========================================
+             WISHLIST HERO
+        ========================================= -->
+
+        <section class="wishlist-header">
+
+            <p class="eyebrow">
+                YOUR PERSONALISED SHORTLIST
+            </p>
+
+            <h1>
+                My Wishlist<span>.</span>
+            </h1>
+
+            <p>
+                Save your favourite HDB blocks, organise your
+                priorities, and keep track of potential homes.
+            </p>
+
+        </section>
+
+        <!-- =========================================
+             SEARCH AND ADD HDB BLOCKS
+        ========================================= -->
+
+        <section class="wishlist-search-section">
+
+            <div class="wishlist-section-heading">
+
+                <div>
+                    <h2>Find a block to save</h2>
+
+                    <p>
+                        Search by town, street name, block number,
+                        or postal code.
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- Search Form -->
+            <form
+                id="wishlistSearchForm"
+                class="wishlist-search-form"
+                role="search"
+            >
+
+                <input
+                    type="search"
+                    id="wishlistSearchInput"
+                    placeholder="e.g. Ang Mo Kio"
+                    aria-label="Search HDB blocks"
+                    required
+                >
+
+                <button type="submit">
+                    Search Blocks
+                </button>
+
+            </form>
+
+            <!-- Search Status -->
+            <p
+                id="wishlistSearchStatus"
+                class="wishlist-status"
+                role="status"
+                aria-live="polite"
+            ></p>
+
+            <!-- Search Results -->
+            <div
+                id="wishlistSearchResults"
+                class="wishlist-search-results"
+            ></div>
+
+        </section>
+
+        <!-- =========================================
+             SAVED HDB BLOCKS
+        ========================================= -->
+
+        <section class="wishlist-saved-section">
+
+            <!-- Section Heading -->
+            <div class="wishlist-section-heading">
+
+                <div>
+
+                    <p class="eyebrow">
+                        SAVED HOMES
+                    </p>
+
+                    <h2>
+                        Your HDB Shortlist
+                    </h2>
+
+                </div>
+
+                <!-- Saved Count -->
+                <span
+                    class="wishlist-count"
+                    id="wishlistCount"
+                >
+                    0 saved
+                </span>
+
+            </div>
+
+            <!-- Wishlist Messages -->
+            <p
+                id="wishlistMessage"
+                class="wishlist-status"
+                role="status"
+                aria-live="polite"
+            ></p>
+
+            <!-- Saved HDB Cards -->
+            <div
+                id="wishlistItems"
+                class="wishlist-grid"
+            ></div>
+
+            <!-- =========================================
+                 EMPTY WISHLIST STATE
+            ========================================= -->
+
+            <div
+                id="wishlistEmpty"
+                class="wishlist-empty"
+                hidden
+            >
+
+                <div
+                    class="wishlist-empty-icon"
+                    aria-hidden="true"
+                >
+                    ♡
+                </div>
+
+                <h3>
+                    Your wishlist is empty
+                </h3>
+
+                <p>
+                    Start exploring HDB blocks and save
+                    your favourites here.
+                </p>
+
+                <a
+                    href="explore.html"
+                    class="wishlist-explore-link"
+                >
+                    Explore HDB Blocks
+                </a>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- =========================================
+         JAVASCRIPT
+    ========================================= -->
+
+    <script src="js/auth-nav.js" defer></script>
+    <script src="js/wishlist.js" defer></script>
+
+</body>
+</html>

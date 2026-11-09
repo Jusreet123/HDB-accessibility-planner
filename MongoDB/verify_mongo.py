@@ -1,8 +1,12 @@
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 from pymongo import MongoClient
 
-load_dotenv()
+# Load MongoDB connection string from backend/.env
+ENV_PATH = Path(__file__).resolve().parent.parent / "backend" / ".env"
+load_dotenv(dotenv_path=ENV_PATH)
+
 db = MongoClient(os.environ["MONGO_URI"])["hdb"]
 
 # ---------- 1. Collection counts ----------

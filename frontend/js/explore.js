@@ -1,6 +1,8 @@
 
+"use strict";
+
 document.addEventListener("DOMContentLoaded", async () => {
-    const searchInput = document.getElementById("blockSearch");
+
     const townFilter = document.getElementById("townFilter");
     const flatTypeFilter = document.getElementById("flatTypeFilter");
     const minPriceInput = document.getElementById("minPrice");
@@ -13,13 +15,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     let currentPage = 1;
 
-    // Read search terms passed from the homepage
-    const urlParams = new URLSearchParams(window.location.search);
-    const searchTerm = urlParams.get("search");
+    // ==========================================
+    // WISHLIST STATE
+    // ==========================================
 
-    if (searchInput && searchTerm) {
-        searchInput.value = searchTerm;
-    }
+    let isLoggedIn = false;
+    const savedBlocks = new Map();
+
+    // Homepage search is mapped to a town when possible.
+    // Non-town terms (street/block numbers) remain supported as an internal search.
+    const urlParams = new URLSearchParams(window.location.search);
+    const homepageSearch = (urlParams.get("search") || "").trim();
+    let addressSearch = "";
 
     // ==========================================
     // 1. LOAD HDB TOWNS
@@ -37,19 +44,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             const result = await response.json();
 
-            townFilter.innerHTML = "";
+            townFilter.replaceChildren();
 
             const defaultOption = document.createElement("option");
             defaultOption.value = "";
             defaultOption.textContent = "All Towns";
             townFilter.appendChild(defaultOption);
 
-            result.data.forEach((town) => {
+            (result.data || []).forEach((town) => {
                 const option = document.createElement("option");
-
                 option.value = town.town_name;
                 option.textContent = town.town_name;
-
                 townFilter.appendChild(option);
             });
 
@@ -59,7 +64,42 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // ==========================================
-    // 2. FORMATTING FUNCTIONS
+    // 2. HOMEPAGE SEARCH TO TOWN FILTER
+    // ==========================================
+
+    function normalizeLocation(value) {
+        return String(value || "")
+            .trim()
+            .replace(/\s+/g, " ")
+            .toUpperCase();
+    }
+
+    function selectTownFromURL() {
+        const requestedTown = (
+            urlParams.get("town") || homepageSearch
+        ).trim();
+
+        if (!requestedTown || !townFilter) return;
+
+        const normalizedSearch = normalizeLocation(requestedTown);
+
+        const matchingTown = Array.from(townFilter.options).find(
+            (option) =>
+                option.value &&
+                normalizeLocation(option.value) === normalizedSearch
+        );
+
+        if (matchingTown) {
+            townFilter.value = matchingTown.value;
+            addressSearch = "";
+        } else if (homepageSearch) {
+            // Preserve homepage street and block-number searches.
+            addressSearch = homepageSearch;
+        }
+    }
+
+    // ==========================================
+    // 3. FORMATTING FUNCTIONS
     // ==========================================
 
     function formatPrice(price) {
@@ -87,14 +127,182 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // ==========================================
-    // 3. CREATE CLICKABLE TRANSACTION CARDS
+    // 4. LOAD USER WISHLIST
+    // ==========================================
+
+    async function loadWishlist() {
+        try {
+            const response = await fetch("/api/wishlist", {
+                credentials: "same-origin"
+            });
+
+            if (response.status === 401) {
+                isLoggedIn = false;
+                savedBlocks.clear();
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error("Unable to load wishlist.");
+            }
+
+            const data = await response.json();
+
+            isLoggedIn = true;
+            savedBlocks.clear();
+
+            (data.wishlist || []).forEach((item) => {
+                savedBlocks.set(
+                    Number(item.block_id),
+                    Number(item.wishlist_id)
+                );
+            });
+
+        } catch (error) {
+            console.error("Wishlist loading failed:", error);
+        }
+    }
+
+    // ==========================================
+    // 5. WISHLIST HEART BUTTON
+    // ==========================================
+
+    function updateHeartButton(button, blockId) {
+        const saved = savedBlocks.has(Number(blockId));
+
+        button.textContent = saved ? "♥" : "♡";
+
+        button.classList.toggle("is-saved", saved);
+
+        button.setAttribute("aria-pressed", String(saved));
+
+        button.setAttribute(
+            "aria-label",
+            saved ? "Remove from wishlist" : "Save to wishlist"
+        );
+
+        button.title = saved
+            ? "Remove from My Wishlist"
+            : "Save to My Wishlist";
+    }
+
+    function refreshHeartButtons() {
+        document.querySelectorAll(
+            ".explore-wishlist-btn"
+        ).forEach((button) => {
+            updateHeartButton(
+                button,
+                Number(button.dataset.blockId)
+            );
+        });
+    }
+
+    async function toggleWishlist(blockId, button) {
+
+        if (!isLoggedIn) {
+            window.location.href =
+                "login.html?redirect=explore.html";
+            return;
+        }
+
+        const numericBlockId = Number(blockId);
+        const alreadySaved = savedBlocks.has(numericBlockId);
+
+        button.disabled = true;
+
+        try {
+            let response;
+
+            if (alreadySaved) {
+                const wishlistId = savedBlocks.get(numericBlockId);
+
+                response = await fetch(
+                    `/api/wishlist/${wishlistId}`,
+                    {
+                        method: "DELETE",
+                        credentials: "same-origin"
+                    }
+                );
+
+            } else {
+                response = await fetch("/api/wishlist", {
+                    method: "POST",
+                    credentials: "same-origin",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        block_id: numericBlockId,
+                        priority: "Medium",
+                        notes: ""
+                    })
+                });
+            }
+
+            if (response.status === 401) {
+                window.location.href =
+                    "login.html?redirect=explore.html";
+                return;
+            }
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.error || "Unable to update wishlist."
+                );
+            }
+
+            if (alreadySaved) {
+                savedBlocks.delete(numericBlockId);
+            } else {
+                savedBlocks.set(
+                    numericBlockId,
+                    Number(data.wishlist_id)
+                );
+            }
+
+            refreshHeartButtons();
+
+        } catch (error) {
+            console.error("Wishlist action failed:", error);
+            window.alert(error.message);
+        } finally {
+            button.disabled = false;
+        }
+    }
+
+    function createWishlistButton(transaction) {
+        const button = document.createElement("button");
+
+        button.type = "button";
+        button.className = "explore-wishlist-btn";
+        button.dataset.blockId = transaction.block_id;
+
+        updateHeartButton(button, transaction.block_id);
+
+        button.addEventListener("click", async (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            await toggleWishlist(transaction.block_id, button);
+        });
+
+        button.addEventListener("keydown", (event) => {
+            event.stopPropagation();
+        });
+
+        return button;
+    }
+
+    // ==========================================
+    // 6. CREATE TRANSACTION CARDS
     // ==========================================
 
     function createTransactionCard(transaction) {
         const card = document.createElement("article");
         card.className = "transaction-card";
 
-        // Make the card interactive
         card.setAttribute("role", "link");
         card.setAttribute("tabindex", "0");
 
@@ -110,21 +318,31 @@ document.addEventListener("DOMContentLoaded", async () => {
             window.location.href = blockUrl;
         }
 
-        // Open block details when clicked
-        card.addEventListener("click", openBlockDetails);
+        card.addEventListener("click", (event) => {
+            if (event.target.closest("button")) return;
+            openBlockDetails();
+        });
 
-        // Keyboard accessibility
         card.addEventListener("keydown", (event) => {
+            if (event.target !== card) return;
+
             if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
                 openBlockDetails();
             }
         });
 
-        // Block address
+        // Card header with wishlist heart
+        const header = document.createElement("div");
+        header.className = "explore-card-header";
+
         const address = document.createElement("h3");
         address.textContent =
             `${transaction.blk_no} ${transaction.street_name}`;
+
+        const heartButton = createWishlistButton(transaction);
+
+        header.append(address, heartButton);
 
         // Town
         const town = document.createElement("p");
@@ -159,7 +377,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         viewDetails.textContent = "View block details →";
 
         card.append(
-            address,
+            header,
             town,
             price,
             details,
@@ -171,7 +389,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // ==========================================
-    // 4. LOAD RESALE TRANSACTIONS
+    // 7. LOAD RESALE TRANSACTIONS
     // ==========================================
 
     async function loadResaleTransactions() {
@@ -180,7 +398,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         pagination.replaceChildren();
 
         const params = new URLSearchParams({
-            search: searchInput.value.trim(),
+            search: addressSearch,
             town: townFilter.value,
             flatType: flatTypeFilter.value,
             minPrice: minPriceInput.value,
@@ -202,7 +420,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             resultsCount.textContent =
                 `${Number(result.total).toLocaleString("en-SG")} historical resale transactions found`;
 
-            if (result.data.length === 0) {
+            if (!result.data || result.data.length === 0) {
                 const empty = document.createElement("p");
                 empty.textContent =
                     "No transactions found. Try adjusting your filters.";
@@ -211,17 +429,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                 return;
             }
 
-            // Display transaction cards
             result.data.forEach((transaction) => {
                 resultsContainer.appendChild(
                     createTransactionCard(transaction)
                 );
             });
 
-            // ==========================================
-            // 5. PAGINATION
-            // ==========================================
-
+            // Pagination
             const previousButton = document.createElement("button");
             previousButton.type = "button";
             previousButton.textContent = "Previous";
@@ -267,7 +481,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // ==========================================
-    // 6. SEARCH AND FILTER EVENTS
+    // 8. SEARCH AND FILTER EVENTS
     // ==========================================
 
     exploreForm.addEventListener("submit", (event) => {
@@ -283,6 +497,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     exploreForm.addEventListener("reset", () => {
+        addressSearch = "";
+
+        // Clear any previous homepage search from the URL.
+        window.history.replaceState(
+            null,
+            "",
+            window.location.pathname
+        );
+
         setTimeout(() => {
             currentPage = 1;
             loadResaleTransactions();
@@ -290,9 +513,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     // ==========================================
-    // 7. INITIALISE EXPLORE PAGE
+    // 9. INITIALISE EXPLORE PAGE
     // ==========================================
 
     await loadTowns();
+    selectTownFromURL();
+
+    // Changing the town manually clears a previous
+    // street/block search inherited from the homepage.
+    townFilter.addEventListener("change", () => {
+        addressSearch = "";
+    });
+
+    await loadWishlist();
     await loadResaleTransactions();
+
 });

@@ -1,6 +1,7 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,25 +13,142 @@
 
 <body>
 
-    <!-- Navigation -->
+    <!-- =========================================
+         NAVIGATION
+    ========================================= -->
+
     <header class="navbar">
+
+        <!-- Logo -->
         <a href="index.html" class="logo">
             haven<span>.</span>
         </a>
 
+        <!-- Main Navigation -->
         <nav aria-label="Main navigation">
-            <a href="index.html" aria-current="page">Home</a>
-            <a href="explore.html">Explore HDB</a>
-            <a href="#">Neighbourhoods</a>
-            <a href="#">Compare</a>
-            <a href="#">Market Insights</a>
+
+            <a href="index.html" aria-current="page">
+                Home
+            </a>
+
+            <a href="explore.html">
+                Explore HDB
+            </a>
+
+            <a href="neighbourhoods.html">
+                Neighbourhoods
+            </a>
+
+
+            <a href="compare.html">
+                Compare
+            </a>
+
+            <a href="insights.html">
+                Market Insights
+            </a>
+
         </nav>
+
+        <!-- =========================================
+             AUTHENTICATION NAVIGATION
+        ========================================= -->
+
+        <div class="auth-nav" id="authNav">
+
+            <!-- Guest Navigation -->
+            <a
+                href="login.html"
+                class="auth-login-btn"
+                id="loginNavBtn"
+                hidden
+            >
+                Login
+            </a>
+
+            <!-- Logged-in User Navigation -->
+            <div
+                class="auth-user-menu"
+                id="userNavMenu"
+                hidden
+            >
+
+                <!-- Profile Dropdown Button -->
+                <button
+                    type="button"
+                    class="profile-dropdown-toggle"
+                    id="profileDropdownToggle"
+                    aria-expanded="false"
+                    aria-controls="profileDropdown"
+                    aria-haspopup="true"
+                >
+
+                    <span
+                        class="profile-avatar"
+                        aria-hidden="true"
+                    >
+                        👤
+                    </span>
+
+                    <span id="navUsername">
+                        My Account
+                    </span>
+
+                    <span
+                        class="dropdown-arrow"
+                        aria-hidden="true"
+                    >
+                        ▾
+                    </span>
+
+                </button>
+
+                <!-- Profile Dropdown Menu -->
+                <div
+                    class="profile-dropdown"
+                    id="profileDropdown"
+                    hidden
+                >
+
+                    <!-- Wishlist -->
+                    <a
+                        href="wishlist.html"
+                        class="dropdown-item"
+                    >
+                        <span aria-hidden="true">♡</span>
+                        My Wishlist
+                    </a>
+
+                    <!-- Logout -->
+                    <button
+                        type="button"
+                        id="logoutNavBtn"
+                        class="dropdown-item dropdown-logout"
+                    >
+                        <span aria-hidden="true">↪</span>
+                        Logout
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
     </header>
+
+    <!-- =========================================
+         MAIN CONTENT
+    ========================================= -->
 
     <main>
 
-        <!-- Hero Section -->
+        <!-- =========================================
+             HERO SECTION
+        ========================================= -->
+
         <section class="hero">
+
             <div class="hero-content">
 
                 <p class="eyebrow">
@@ -55,6 +173,7 @@
                     method="get"
                     role="search"
                 >
+
                     <input
                         type="search"
                         name="search"
@@ -65,15 +184,22 @@
                     <button type="submit">
                         Explore Homes
                     </button>
+
                 </form>
 
             </div>
+
         </section>
 
-        <!-- Platform Features -->
+        <!-- =========================================
+             PLATFORM FEATURES
+        ========================================= -->
+
         <section class="features">
 
+            <!-- Section Heading -->
             <div class="section-heading">
+
                 <p class="eyebrow">
                     EXPLORE WITH CONFIDENCE
                 </p>
@@ -86,56 +212,77 @@
                     From resale prices to neighbourhood convenience,
                     discover what matters before choosing your next home.
                 </p>
+
             </div>
 
+            <!-- Feature Cards -->
             <div class="feature-grid">
 
                 <!-- Feature 1 -->
                 <article class="feature-card">
+
                     <div class="feature-icon">
                         ⌂
                     </div>
 
-                    <h3>Explore HDB</h3>
+                    <h3>
+                        Explore HDB
+                    </h3>
 
                     <p>
                         Discover HDB blocks and explore historical
                         resale transactions across Singapore.
                     </p>
+
                 </article>
 
                 <!-- Feature 2 -->
                 <article class="feature-card">
+
                     <div class="feature-icon">
                         ◎
                     </div>
 
-                    <h3>Neighbourhood Accessibility</h3>
+                    <h3>
+                        Neighbourhood Accessibility
+                    </h3>
 
                     <p>
                         Understand what's nearby, from transport
                         connections to everyday amenities.
                     </p>
+
                 </article>
 
                 <!-- Feature 3 -->
                 <article class="feature-card">
+
                     <div class="feature-icon">
                         ↗
                     </div>
 
-                    <h3>Market Insights</h3>
+                    <h3>
+                        Market Insights
+                    </h3>
 
                     <p>
                         Explore resale price trends and compare
                         different HDB locations with confidence.
                     </p>
+
                 </article>
 
             </div>
+
         </section>
 
     </main>
+
+    <!-- =========================================
+         JAVASCRIPT
+    ========================================= -->
+
+    <script src="js/auth-nav.js" defer></script>
 
 </body>
 </html>
