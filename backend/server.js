@@ -9,6 +9,7 @@ const townsRouter = require("./routes/towns");
 const insightsRouter = require("./routes/insights");
 const authRouter = require("./routes/auth");
 const wishlistRouter = require("./routes/wishlist");
+const { router: notesRouter, ensureNotesCollection } = require("./routes/notes");
 
 const sessionMiddleware = require("./session");
 const passport = require("./googleAuth");
@@ -49,6 +50,9 @@ app.use("/auth", authRouter);
 
 // Authenticated HDB wishlist CRUD routes
 app.use("/api/wishlist", wishlistRouter);
+
+// MongoDB community notes CRUD (reading is public, writing needs login)
+app.use("/api/notes", notesRouter);
 
 // Serve Haven frontend
 const frontendPath = path.join(__dirname, "../frontend");
@@ -673,10 +677,12 @@ app.listen(PORT, () => {
     console.log(`Hawker Sample: http://localhost:${PORT}/api/debug/hawker-sample`);
     console.log("-----------------------------------");
 
-    connectMongoDB().catch((error) => {
-        console.error(
-            "Unexpected MongoDB startup error:",
-            error.message
-        );
-    });
+        connectMongoDB()
+        .then((mongoDb) => (mongoDb ? ensureNotesCollection(mongoDb) : null))
+        .catch((error) => {
+            console.error(
+                "Unexpected MongoDB startup error:",
+                error.message
+            );
+        });
 });
