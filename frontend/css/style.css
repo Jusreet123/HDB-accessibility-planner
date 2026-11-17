@@ -3848,11 +3848,199 @@ a {
     pointer-events: auto;
 }
 
-/* Community notes (MongoDB) */
-#notes-panel form { display: grid; gap: 0.5rem; max-width: 36rem; margin: 1rem 0; }
-#notes-panel textarea { min-height: 5rem; padding: 0.6rem; font: inherit; }
-#notes-panel input[type="number"] { padding: 0.5rem; font: inherit; max-width: 12rem; }
-#notes-panel ul { list-style: none; padding: 0; margin: 0; }
-#notes-panel li { padding: 0.6rem 0; border-bottom: 1px solid rgba(0, 0, 0, 0.12); }
-#notes-panel li button { margin-left: 0.5rem; }
-#np-message { color: #b00020; min-height: 1.2em; }
+/* =========================================
+   COMMUNITY NOTES & PLACES (MONGODB)
+========================================= */
+
+/* Panel Containers */
+#notes-panel, 
+#community-panel {
+    background: #FFFFFF;
+    border: 1px solid #E4EBEF;
+    border-top: 4px solid #138F80;
+    border-radius: 18px;
+    padding: 32px;
+    margin-top: 28px;
+    box-shadow: 0 6px 24px rgba(16, 43, 63, 0.045);
+}
+
+/* Headings inside panels (optional, if you use them) */
+#notes-panel h3,
+#community-panel h3 {
+    font-family: 'Manrope', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: #102B3F;
+    margin-bottom: 22px;
+}
+
+/* Forms Layout */
+#notes-panel form, 
+#community-panel form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 100%;
+    margin-bottom: 24px;
+}
+
+/* Form Inputs */
+#notes-panel textarea, 
+#notes-panel input[type="number"], 
+#community-panel input[type="text"], 
+#community-panel input[type="number"], 
+#community-panel select {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 16px;
+    background: #FFFFFF;
+    border: 1px solid #DCE5EA;
+    border-radius: 9px;
+    color: #102B3F;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#notes-panel textarea {
+    min-height: 100px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+/* Input Focus States */
+#notes-panel textarea:focus, 
+#notes-panel input:focus, 
+#community-panel input:focus, 
+#community-panel select:focus {
+    border-color: #138F80;
+    box-shadow: 0 0 0 3px rgba(19, 143, 128, 0.12);
+}
+
+/* Submit Buttons */
+#notes-panel form button,
+#community-panel form button {
+    align-self: flex-start;
+    min-height: 46px;
+    padding: 12px 26px;
+    background: #138F80;
+    color: #FFFFFF;
+    border: 1px solid #138F80;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+#notes-panel form button:hover,
+#community-panel form button:hover {
+    background: #0E7569;
+}
+
+/* Data Lists */
+#notes-panel ul, 
+#community-panel ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-top: 1px solid #E4EBEF;
+}
+
+#notes-panel li, 
+#community-panel li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 0;
+    border-bottom: 1px solid #E4EBEF;
+    color: #102B3F;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+#notes-panel li > div, 
+#community-panel li > div {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: break-word;
+}
+
+/* Action Buttons in Lists (Delete) */
+#notes-panel li button, 
+#community-panel li button {
+    flex-shrink: 0;
+    min-height: 38px;
+    padding: 8px 16px;
+    background: #FFF1F0;
+    color: #B43B3B;
+    border: 1px solid #F5C2BE;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+#notes-panel li button:hover, 
+#community-panel li button:hover {
+    background: #FCE4E4;
+}
+
+/* Community Places Badges */
+.community-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 10px;
+    padding: 6px 10px;
+    background: #E5F5F1;
+    color: #0E7569;
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+/* Error/Success Messages */
+#np-message,
+#cp-message {
+    color: #B43B3B;
+    font-size: 13px;
+    font-weight: 600;
+    min-height: 1.2em;
+    margin-top: 8px;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+    #notes-panel, 
+    #community-panel {
+        padding: 24px;
+        margin-top: 20px;
+    }
+    
+    #notes-panel form button,
+    #community-panel form button {
+        width: 100%;
+    }
+    
+    #notes-panel li, 
+    #community-panel li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    #notes-panel li button, 
+    #community-panel li button {
+        width: 100%;
+    }
+    
+    .community-badge {
+        margin-left: 0;
+        margin-top: 8px;
+    }
+}

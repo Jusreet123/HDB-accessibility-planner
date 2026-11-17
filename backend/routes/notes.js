@@ -9,7 +9,6 @@ const COLLECTION = "block_notes";
 // 1. COLLECTION SETUP (validator + indexes)
 // ==========================================
 
-// The validator is MongoDB's counterpart to a CHECK constraint.
 const VALIDATOR = {
     $jsonSchema: {
         bsonType: "object",
@@ -18,7 +17,6 @@ const VALIDATOR = {
             block_id: { bsonType: "number", multipleOf: 1, minimum: 1 },
             user_id: { bsonType: "number", multipleOf: 1, minimum: 1 },
             note: { bsonType: "string", minLength: 1, maxLength: 500 },
-            rating: { bsonType: "number", multipleOf: 1, minimum: 1, maximum: 5 },
             tags: { bsonType: "array", maxItems: 10, items: { bsonType: "string" } },
             created_at: { bsonType: "date" },
             updated_at: { bsonType: "date" }
@@ -34,7 +32,6 @@ async function ensureNotesCollection(db) {
     if (existing.length === 0) {
         await db.createCollection(COLLECTION, { validator: VALIDATOR });
     } else if (!existing[0].options || !existing[0].options.validator) {
-        // Only needed when the collection exists without rules. collMod needs the dbAdmin role.
         try {
             await db.command({ collMod: COLLECTION, validator: VALIDATOR });
         } catch (error) {
@@ -62,8 +59,6 @@ function has(value) {
     return value !== undefined && value !== null && value !== "";
 }
 
-// Only plain non-empty strings are accepted, which blocks
-// NoSQL injection such as ?tag[$ne]=x
 function text(value, name, max = 500) {
     if (typeof value !== "string" || !value.trim()) {
         throw new Invalid(`${name} must be non-empty text.`);
@@ -98,7 +93,6 @@ function integer(value, name, min, max) {
 
 const ALLOWED_QUERY = new Set(["block_id", "tag", "limit", "skip"]);
 
-// Rejects stray parameters such as block_id[$ne], which some Express versions would otherwise ignore silently
 function rejectUnknownQuery(req) {
     for (const key of Object.keys(req.query)) {
         if (!ALLOWED_QUERY.has(key)) {
@@ -117,7 +111,6 @@ function noteId(value) {
 
 function currentUserId(req) {
     const id = Number(req.session?.userId);
-
     return Number.isSafeInteger(id) && id > 0 ? id : null;
 }
 
@@ -135,17 +128,14 @@ function requireAuth(req, res, next) {
 }
 
 function notesCollection() {
-    // Throws "MongoDB is not connected." until the startup connection has finished
     return getMongoDB().collection(COLLECTION);
 }
 
 function publicNote(doc, viewerId) {
-    // user_id is never sent to the browser, only whether the viewer owns the note
     return {
         id: doc._id.toString(),
         block_id: doc.block_id,
         note: doc.note,
-        rating: doc.rating ?? null,
         tags: doc.tags || [],
         created_at: doc.created_at,
         updated_at: doc.updated_at,
@@ -169,7 +159,6 @@ function fail(res, error) {
     }
 
     console.error("Notes route failed:", error && error.message);
-
     res.status(500).json({ error: "Unable to process the request." });
 }
 
@@ -180,7 +169,7 @@ function fail(res, error) {
 // Notes for one block, newest first
 router.get("/", async (req, res) => {
     try {
-         rejectUnknownQuery(req);
+        rejectUnknownQuery(req);
 
         const filter = {};
 
@@ -216,7 +205,7 @@ router.get("/", async (req, res) => {
     }
 });
 
-// Average rating and counts for one block ($group)
+// Total notes count for one block ($group)
 router.get("/summary/:blockId", async (req, res) => {
     try {
         const blockId = integer(req.params.blockId, "block_id", 1);
@@ -227,13 +216,7 @@ router.get("/summary/:blockId", async (req, res) => {
                 {
                     $group: {
                         _id: "$block_id",
-                        notes: { $sum: 1 },
-                        ratings: {
-                            $sum: {
-                                $cond: [{ $ifNull: ["$rating", false] }, 1, 0]
-                            }
-                        },
-                        avg_rating: { $avg: "$rating" }
+                        notes: { $sum: 1 }
                     }
                 }
             ])
@@ -241,67 +224,8 @@ router.get("/summary/:blockId", async (req, res) => {
 
         res.json({
             block_id: blockId,
-            notes: result ? result.notes : 0,
-            ratings: result ? result.ratings : 0,
-            avg_rating:
-                result && result.avg_rating !== null
-                    ? Math.round(result.avg_rating * 100) / 100
-                    : null
+            notes: result ? result.notes : 0
         });
-
-    } catch (error) {
-        fail(res, error);
-    }
-});
-
-// Top-rated blocks: $group, $sort, $lookup into the blocks collection
-router.get("/top", async (req, res) => {
-    try {
-        const minRatings = has(req.query.min)
-            ? integer(req.query.min, "min", 1, 100)
-            : 2;
-
-        const limit = has(req.query.limit)
-            ? integer(req.query.limit, "limit", 1, 20)
-            : 5;
-
-        const rows = await notesCollection()
-            .aggregate([
-                { $match: { rating: { $exists: true } } },
-                {
-                    $group: {
-                        _id: "$block_id",
-                        avg_rating: { $avg: "$rating" },
-                        n_ratings: { $sum: 1 }
-                    }
-                },
-                { $match: { n_ratings: { $gte: minRatings } } },
-                { $sort: { avg_rating: -1, n_ratings: -1 } },
-                { $limit: limit },
-                {
-                    $lookup: {
-                        from: "blocks",
-                        localField: "_id",
-                        foreignField: "block_id",
-                        as: "block"
-                    }
-                },
-                { $unwind: "$block" },
-                {
-                    $project: {
-                        _id: 0,
-                        block_id: "$_id",
-                        n_ratings: 1,
-                        avg_rating: { $round: ["$avg_rating", 2] },
-                        blk_no: "$block.blk_no",
-                        street_name: "$block.street_name",
-                        town_name: "$block.town_name"
-                    }
-                }
-            ])
-            .toArray();
-
-        res.json({ blocks: rows });
 
     } catch (error) {
         fail(res, error);
@@ -337,7 +261,6 @@ router.post("/", requireAuth, async (req, res) => {
         const blockId = integer(body.block_id, "block_id", 1);
         const db = getMongoDB();
 
-        // MongoDB has no foreign keys, so the application confirms the block exists
         const blockExists = await db
             .collection("blocks")
             .countDocuments({ block_id: blockId }, { limit: 1 });
@@ -350,15 +273,11 @@ router.post("/", requireAuth, async (req, res) => {
 
         const doc = {
             block_id: blockId,
-            user_id: req.userId,     // taken from the session, never from the request body
+            user_id: req.userId, 
             note: text(body.note, "note"),
             created_at: now,
             updated_at: now
         };
-
-        if (has(body.rating)) {
-            doc.rating = integer(body.rating, "rating", 1, 5);
-        }
 
         if (Array.isArray(body.tags) && body.tags.length > 0) {
             if (body.tags.length > 10) {
@@ -396,17 +315,12 @@ router.put("/:id", requireAuth, async (req, res) => {
             changes.note = text(body.note, "note");
         }
 
-        if (has(body.rating)) {
-            changes.rating = integer(body.rating, "rating", 1, 5);
-        }
-
         if (Object.keys(changes).length === 0) {
             throw new Invalid("Nothing to update.");
         }
 
         changes.updated_at = new Date();
 
-        // Filtering on user_id as well as _id means only the author can edit
         const result = await notesCollection().updateOne(
             { _id, user_id: req.userId },
             { $set: changes }

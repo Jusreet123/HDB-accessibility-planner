@@ -10,6 +10,7 @@ const insightsRouter = require("./routes/insights");
 const authRouter = require("./routes/auth");
 const wishlistRouter = require("./routes/wishlist");
 const { router: notesRouter, ensureNotesCollection } = require("./routes/notes");
+const { router: communityRouter, ensureCommunityPlaces } = require("./routes/community");
 
 const sessionMiddleware = require("./session");
 const passport = require("./googleAuth");
@@ -53,6 +54,9 @@ app.use("/api/wishlist", wishlistRouter);
 
 // MongoDB community notes CRUD (reading is public, writing needs login)
 app.use("/api/notes", notesRouter);
+
+// MongoDB community places: GeoJSON points with $geoNear (reading is public, writing needs login)
+app.use("/api/community-places", communityRouter);
 
 // Serve Haven frontend
 const frontendPath = path.join(__dirname, "../frontend");
@@ -678,7 +682,14 @@ app.listen(PORT, () => {
     console.log("-----------------------------------");
 
         connectMongoDB()
-        .then((mongoDb) => (mongoDb ? ensureNotesCollection(mongoDb) : null))
+        .then((mongoDb) =>
+            mongoDb
+                ? Promise.all([
+                      ensureNotesCollection(mongoDb),
+                      ensureCommunityPlaces(mongoDb)
+                  ])
+                : null
+        )
         .catch((error) => {
             console.error(
                 "Unexpected MongoDB startup error:",

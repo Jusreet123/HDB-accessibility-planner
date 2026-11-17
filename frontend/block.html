@@ -24,9 +24,11 @@
     ></script>
 
     <!-- Haven JavaScript -->
+    <script src="js/community-map-hook.js" defer></script>
     <script src="js/block.js" defer></script>
     <script src="js/block-wishlist.js" defer></script>
     <script src="js/block-notes.js" defer></script>
+    <script src="js/block-community.js" defer></script>
     <script src="js/auth-nav.js" defer></script>
 </head>
 
@@ -1107,6 +1109,57 @@
             </section>
 
             <!-- ===================================== -->
+            <!-- COMMUNITY PLACES (MongoDB) -->
+            <!-- ===================================== -->
+
+            <section
+                class="block-details-section"
+                id="communityPlacesSection"
+                aria-labelledby="communityPlacesHeading"
+            >
+
+                <p class="eyebrow">
+                    COMMUNITY CONTRIBUTIONS
+                </p>
+
+                <h2 id="communityPlacesHeading">
+                    Community-submitted places
+                </h2>
+
+                <p class="block-section-description">
+                    Add places the official data misses, such as a
+                    kopitiam, a sheltered bus stop or a playground.
+                    Anyone can see them, and you need to log in to add,
+                    edit or delete your own.
+                </p>
+
+                <div id="community-panel"></div>
+
+            </section>
+            
+            <!-- ===================================== -->
+            <!-- COMMUNITY NOTES (MongoDB) -->
+            <!-- ===================================== -->
+
+            <section
+                class="block-details-section"
+                id="communityNotesSection"
+                aria-labelledby="communityNotesHeading"
+            >
+
+                <h2 id="communityNotesHeading">Community notes</h2>
+
+                <p class="block-section-description">
+                    Share short notes about this block.
+                    Anyone can read them, and you need to log in to
+                    add, edit or delete your own notes.
+                </p>
+
+                <div id="notes-panel"></div>
+
+            </section>
+
+            <!-- ===================================== -->
             <!-- RECENT RESALE TRANSACTIONS -->
             <!-- ===================================== -->
 
@@ -1125,28 +1178,6 @@
                 >
                     <p>Loading transactions...</p>
                 </div>
-
-            </section>
-
-            <!-- ===================================== -->
-            <!-- COMMUNITY NOTES (MongoDB) -->
-            <!-- ===================================== -->
-
-            <section
-                class="block-details-section"
-                id="communityNotesSection"
-                aria-labelledby="communityNotesHeading"
-            >
-
-                <h2 id="communityNotesHeading">Community notes</h2>
-
-                <p class="block-section-description">
-                    Share short notes and ratings about this block.
-                    Anyone can read them, and you need to log in to
-                    add, edit or delete your own notes.
-                </p>
-
-                <div id="notes-panel"></div>
 
             </section>
             

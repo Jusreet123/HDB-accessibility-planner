@@ -9,7 +9,6 @@
         <p id="np-summary"></p>
         <form id="np-form">
             <textarea id="np-note" placeholder="Share a note about this block" maxlength="500" required></textarea>
-            <input id="np-rating" type="number" min="1" max="5" placeholder="Rating 1-5 (optional)">
             <button type="submit">Add note</button>
         </form>
         <p id="np-message" role="alert"></p>
@@ -70,24 +69,26 @@
             api("GET", `/api/notes/summary/${blockId}`)
         ]);
 
-        $("np-summary").textContent = summary.ratings
-            ? `Average rating ${summary.avg_rating}/5 from ${summary.ratings} rating(s)`
-            : "No ratings yet";
+        $("np-summary").textContent = summary.notes 
+            ? `${summary.notes} community note${summary.notes === 1 ? '' : 's'}` 
+            : "No notes yet. Be the first to share!";
 
         const listEl = $("np-list");
         listEl.replaceChildren();
 
         if (!list.notes.length) {
-            listEl.textContent = "No community notes yet.";
-            return;
+            return; // We show the "No notes yet" in the summary instead
         }
 
         for (const n of list.notes) {
             const li = document.createElement("li");
-            const ratingText = n.rating ? ` (${n.rating}/5)` : "";
+            
+            // Note content wrapper (matches the new CSS layout)
+            const contentDiv = document.createElement("div");
             const date = new Date(n.created_at).toLocaleDateString();
-
-            li.textContent = `${n.mine ? "You" : "Resident"}${ratingText} on ${date}: ${n.note} `;
+            contentDiv.textContent = `${n.mine ? "You" : "Resident"} on ${date}: ${n.note}`;
+            
+            li.appendChild(contentDiv);
 
             if (n.mine) {
                 const edit = document.createElement("button");
@@ -97,10 +98,7 @@
                     const newNote = prompt("Edit your note", n.note);
                     if (newNote === null) return;
 
-                    const newRating = prompt("Rating 1-5 (leave empty to keep)", n.rating ?? "");
                     const body = { note: newNote };
-                    if (newRating) body.rating = newRating;
-
                     act(() => api("PUT", `/api/notes/${n.id}`, body));
                 };
 
@@ -131,12 +129,10 @@
         act(async () => {
             await api("POST", "/api/notes", {
                 block_id: blockId,
-                note: $("np-note").value,
-                rating: $("np-rating").value || null
+                note: $("np-note").value
             });
 
             $("np-note").value = "";
-            $("np-rating").value = "";
         });
     });
 
