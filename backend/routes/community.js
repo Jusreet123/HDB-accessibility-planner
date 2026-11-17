@@ -282,6 +282,93 @@ function fail(res, error) {
 }
 
 // ==========================================
+// REUSABLE: NEAREST COMMUNITY PLACES BY CATEGORY
+// ==========================================
+
+async function communityByCategory(db, location, radius, perCategory = 5) {
+    const rows = await db
+        .collection(COLLECTION)
+        .aggregate([
+            {
+                $geoNear: {
+                    near: location,
+                    distanceField: "dist_m",
+                    maxDistance: radius,
+                    spherical: true
+                }
+            },
+            { $sort: { dist_m: 1 } },
+            {
+                $group: {
+                    _id: "$category",
+                    places: {
+                        $push: {
+                            id: { $toString: "$_id" },
+                            name: "$name",
+                            attributes: "$attributes",
+                            lng: { $arrayElemAt: ["$location.coordinates", 0] },
+                            lat: { $arrayElemAt: ["$location.coordinates", 1] },
+                            dist_m: "$dist_m"
+                        }
+                    }
+                }
+            },
+            { $project: { places: { $slice: ["$places", perCategory] } } }
+        ])
+        .toArray();
+
+    const result = {};
+
+    for (const category of CATEGORIES) result[category] = [];
+
+    for (const row of rows) {
+        result[row._id] = row.places.map((p) => ({
+            id: p.id,
+            name: p.name,
+            category: row._id,
+            attributes: p.attributes || {},
+            lat: p.lat,
+            lng: p.lng,
+            distance_m: Math.round(p.dist_m),
+            source: "community"
+        }));
+    }
+
+    return result;
+}
+
+router.get("/by-category/:blockId", async (req, res) => {
+    try {
+        rejectUnknownQuery(req);
+
+        const blockId = integer(req.params.blockId, "block_id", 1);
+
+        const radius = has(req.query.radius)
+            ? integer(req.query.radius, "radius", 50, 5000)
+            : 500;
+
+        const db = getMongoDB();
+
+        const block = await db
+            .collection("blocks")
+            .findOne({ block_id: blockId }, { projection: { location: 1 } });
+
+        if (!block || !block.location) {
+            return res.status(404).json({ error: "HDB block or its coordinates not found." });
+        }
+
+        res.json({
+            block_id: blockId,
+            radius_m: radius,
+            categories: await communityByCategory(db, block.location, radius, 5)
+        });
+
+    } catch (error) {
+        fail(res, error);
+    }
+});
+
+// ==========================================
 // 3. READ - PLACES NEAR A BLOCK (PUBLIC)
 // ==========================================
 
@@ -496,4 +583,4 @@ router.delete("/:id", requireAuth, async (req, res) => {
     }
 });
 
-module.exports = { router, ensureCommunityPlaces };
+module.exports = { router, ensureCommunityPlaces, communityByCategory};

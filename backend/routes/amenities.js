@@ -2,6 +2,7 @@
 const express = require("express");
 const pool = require("../db");
 const { getMongoDB } = require("../mongo");
+const { communityByCategory } = require("./community");
 
 const router = express.Router();
 
@@ -166,6 +167,59 @@ router.get("/:blockId/amenities", async (req, res) => {
             })
         );
 
+                // 5b. Optionally merge community-submitted places into each category
+        const includeCommunity = req.query.include_community === "1";
+        let communityIncluded = 0;
+
+        if (includeCommunity) {
+            try {
+                const community = await communityByCategory(
+                    mongoDb,
+                    location,
+                    radius,
+                    5
+                );
+
+                for (const entry of results) {
+                    const extra = (community[entry.category] || []).map(
+                        (place) => ({
+                            name: place.name,
+                            distance_m: place.distance_m,
+                            exit_code: null,
+                            location: {
+                                type: "Point",
+                                coordinates: [place.lng, place.lat]
+                            },
+                            source: "community"
+                        })
+                    );
+
+                    const merged = [
+                        ...entry.amenities.map((item) => ({
+                            ...item,
+                            source: "official"
+                        })),
+                        ...extra
+                    ]
+                        .sort((a, b) => a.distance_m - b.distance_m)
+                        .slice(0, 5);
+
+                    communityIncluded += merged.filter(
+                        (item) => item.source === "community"
+                    ).length;
+
+                    entry.amenities = merged;
+                    entry.count = merged.length;
+                }
+            } catch (error) {
+                // The official results are still returned if the community lookup fails
+                console.error(
+                    "Community places could not be merged:",
+                    error.message
+                );
+            }
+        }
+        
         // 6. Return combined MySQL + MongoDB results
         return res.json({
             status: "success",
@@ -177,7 +231,9 @@ router.get("/:blockId/amenities", async (req, res) => {
             },
             radius_m: radius,
             distance_type: "straight-line",
-            categories: results
+            categories: results,
+            include_community: includeCommunity,
+            community_included: communityIncluded
         });
 
     } catch (error) {

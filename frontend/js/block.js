@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const amenitiesRadius = document.getElementById("amenitiesRadius");
     const amenitiesStatus = document.getElementById("amenitiesStatus");
+    const includeCommunityToggle = document.getElementById("includeCommunityPlaces");
     const neighbourhoodMapElement = document.getElementById("neighbourhoodMap");
 
     const mapLegendShowAll = document.getElementById("mapLegendShowAll");
@@ -172,6 +173,25 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
+    function updateCommunityNote(result) {
+        const note = document.getElementById("communityScoreNote");
+
+        if (!note) {
+            return;
+        }
+
+        if (!includeCommunityToggle || !includeCommunityToggle.checked) {
+            note.textContent = "";
+            return;
+        }
+
+        const count = Number(result?.community_included || 0);
+
+        note.textContent = count > 0
+            ? `Includes ${count} unverified community-submitted place${count === 1 ? "" : "s"} in the amenity lists and score.`
+            : "No community-submitted places within this radius, so the score is unchanged.";
+    }
+    
     function setAccessibilityText(id, value) {
         const element = document.getElementById(id);
 
@@ -876,12 +896,15 @@ document.addEventListener("DOMContentLoaded", async () => {
                     return;
                 }
 
+                const isCommunity = amenity.source === "community";
+
                 const marker = L.circleMarker(
                     coordinates,
                     {
-                        radius: 7,
-                        color: "#FFFFFF",
-                        weight: 2,
+                        radius: isCommunity ? 8 : 7,
+                        color: isCommunity ? "#0F172A" : "#FFFFFF",
+                        weight: isCommunity ? 3 : 2,
+                        dashArray: isCommunity ? "3 3" : null,
                         fillColor: colour,
                         fillOpacity: 0.95
                     }
@@ -894,7 +917,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                         ? `${amenity.name} — ${amenity.exit_code}`
                         : (amenity.name || "Unnamed amenity")
                 );
-
 
                 const type = createTextElement(
                     "p",
@@ -911,6 +933,15 @@ document.addEventListener("DOMContentLoaded", async () => {
                     type,
                     distance
                 );
+
+                if (isCommunity) {
+                    popup.append(
+                        createTextElement(
+                            "p",
+                            "Community-submitted, unverified"
+                        )
+                    );
+                }
 
                 marker.bindPopup(popup);
                 marker.addTo(layer);
@@ -1223,10 +1254,28 @@ document.addEventListener("DOMContentLoaded", async () => {
                 "amenity-distance"
             );
 
-            item.append(
-                nameButton,
-                distanceElement
-            );
+            if (amenity.source === "community") {
+                const nameWrap = document.createElement("span");
+                const badge = createTextElement(
+                    "span",
+                    "Community",
+                    "community-badge"
+                );
+
+                badge.title = "Added by a resident and not verified";
+
+                nameWrap.append(nameButton, " ", badge);
+
+                item.append(
+                    nameWrap,
+                    distanceElement
+                );
+            } else {
+                item.append(
+                    nameButton,
+                    distanceElement
+                );
+            }
 
             list.appendChild(item);
         });
@@ -1269,8 +1318,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         updateMapRadius(radius);
 
         try {
+                const includeCommunity =
+                includeCommunityToggle && includeCommunityToggle.checked
+                    ? "&include_community=1"
+                    : "";
+
             const response = await fetch(
-                `/api/blocks/${encodeURIComponent(blockId)}/amenities?radius=${radius}`
+                `/api/blocks/${encodeURIComponent(blockId)}/amenities?radius=${radius}${includeCommunity}`
             );
 
             const result = await response.json();
@@ -1306,6 +1360,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             currentAmenityRadius = radius;
 
             calculateAccessibilityScore();
+            
+            updateCommunityNote(result);
 
             // Create markers before clickable lists.
             displayAmenitiesOnMap(categories);
@@ -1482,6 +1538,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (amenitiesRadius) {
         amenitiesRadius.addEventListener(
+            "change",
+            loadNearbyAmenities
+        );
+    }
+    
+    if (includeCommunityToggle) {
+        includeCommunityToggle.addEventListener(
             "change",
             loadNearbyAmenities
         );
