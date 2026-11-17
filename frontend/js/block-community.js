@@ -303,11 +303,7 @@
         const input = el("input", { type: "checkbox", id: "communityMapToggle", checked: true });
         input.addEventListener("change", () => {
             showOnMap = input.checked;
-
-            if (!layer || !map) return;
-
-            if (showOnMap) layer.addTo(map);
-            else map.removeLayer(layer);
+            applyLayerVisibility();
         });
 
         const dot = el("span", { className: "map-legend-dot" });
@@ -319,13 +315,28 @@
         );
     }
 
+    // When community places are merged into the official lists, block.js draws them itself,
+    // so this panel's own markers are hidden to avoid showing every place twice.
+    function applyLayerVisibility() {
+        if (!map || !layer) return;
+
+        const mergedToggle = document.getElementById("includeCommunityPlaces");
+        const merged = Boolean(mergedToggle && mergedToggle.checked);
+
+        if (showOnMap && !merged) {
+            if (!map.hasLayer(layer)) layer.addTo(map);
+        } else if (map.hasLayer(layer)) {
+            map.removeLayer(layer);
+        }
+    }
+    
     function attachMap(newMap) {
         if (!window.L || !newMap) return;
 
         map = newMap;
         layer = L.layerGroup();
 
-        if (showOnMap) layer.addTo(map);
+        applyLayerVisibility();
 
         renderMarkers();
         addLegendToggle();
@@ -441,6 +452,8 @@
     const radiusSelect = document.getElementById("amenitiesRadius");
     if (radiusSelect) {
         radiusSelect.addEventListener("change", () => refresh().catch(showMessage));
+        const mergedToggle = document.getElementById("includeCommunityPlaces");
+        if (mergedToggle) mergedToggle.addEventListener("change", applyLayerVisibility);
     }
 
     // ---------- start ----------
