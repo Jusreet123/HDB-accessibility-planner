@@ -4,6 +4,12 @@ const pool = require("../db");
 const { getMongoDB } = require("../mongo");
 const { communityByCategory } = require("./community");
 
+// Server-side caching
+const {
+    getCachedAmenities,
+    setCachedAmenities
+} = require("../amenities-cache");
+
 const router = express.Router();
 
 // Nearby amenity categories stored in MongoDB
@@ -21,17 +27,27 @@ const AMENITY_COLLECTIONS = [
 
 router.get("/:blockId/amenities", async (req, res) => {
     try {
-        // 1. Validate HDB block ID
+
+        // ======================================
+        // 1. VALIDATE HDB BLOCK ID
+        // ======================================
+
         const blockId = Number(req.params.blockId);
 
-        if (!Number.isSafeInteger(blockId) || blockId <= 0) {
+        if (
+            !Number.isSafeInteger(blockId) ||
+            blockId <= 0
+        ) {
             return res.status(400).json({
                 status: "error",
                 message: "Invalid block ID"
             });
         }
 
-        // 2. Validate search radius
+        // ======================================
+        // 2. VALIDATE SEARCH RADIUS
+        // ======================================
+
         const radius = Number(req.query.radius ?? 500);
 
         if (
@@ -45,7 +61,35 @@ router.get("/:blockId/amenities", async (req, res) => {
             });
         }
 
-        // 3. Retrieve HDB block coordinates from MySQL
+        // ======================================
+        // 3. CHECK SERVER-SIDE CACHE
+        // ======================================
+
+        // Community places are excluded from caching
+        // to avoid returning outdated submissions.
+        const includeCommunity =
+            req.query.include_community === "1";
+
+        if (!includeCommunity) {
+
+            const cached = getCachedAmenities(
+                blockId,
+                radius
+            );
+
+            if (cached) {
+
+                // Cache hit: skip MySQL and MongoDB
+                res.set("X-Cache", "HIT");
+
+                return res.json(cached);
+            }
+        }
+
+        // ======================================
+        // 4. RETRIEVE HDB BLOCK FROM MYSQL
+        // ======================================
+
         const [blocks] = await pool.query(
             `
             SELECT
@@ -88,12 +132,17 @@ router.get("/:blockId/amenities", async (req, res) => {
             });
         }
 
-        // 4. Connect to MongoDB
+        // ======================================
+        // 5. CONNECT TO MONGODB
+        // ======================================
+
         let mongoDb;
 
         try {
             mongoDb = getMongoDB();
+
         } catch (error) {
+
             return res.status(503).json({
                 status: "error",
                 message: "MongoDB is not connected"
@@ -105,138 +154,208 @@ router.get("/:blockId/amenities", async (req, res) => {
             coordinates: [longitude, latitude]
         };
 
-        // 5. Search each amenity collection
+        // ======================================
+        // 6. SEARCH MONGODB AMENITY COLLECTIONS
+        // ======================================
+
+        // Run five geospatial queries concurrently
         const results = await Promise.all(
-            AMENITY_COLLECTIONS.map(async (collectionName) => {
-                const collection = mongoDb.collection(collectionName);
+            AMENITY_COLLECTIONS.map(
+                async (collectionName) => {
 
-                const pipeline = [
-                    {
-                        $geoNear: {
-                            near: location,
-                            key: "location",
-                            distanceField: "distance_m",
-                            maxDistance: radius,
-                            spherical: true
+                    const collection =
+                        mongoDb.collection(collectionName);
+
+                    const pipeline = [
+                        {
+                            $geoNear: {
+                                near: location,
+                                key: "location",
+                                distanceField: "distance_m",
+                                maxDistance: radius,
+                                spherical: true
+                            }
+                        },
+                        {
+                            $limit: 5
+                        },
+                        {
+                            $project: {
+                                _id: 0,
+                                location: 1,
+                                distance_m: 1,
+                                name: 1,
+                                station_na: 1,
+                                exit_code: 1,
+                                bus_stop_num: 1,
+                                description: 1,
+                                centre_name: 1
+                            }
                         }
-                    },
-                    {
-                        $limit: 5
-                    },
-                    {
-                        $project: {
-                            _id: 0,
-                            location: 1,
-                            distance_m: 1,
-                            name: 1,
-                            station_na: 1,
-                            exit_code: 1,
-                            bus_stop_num: 1,
-                            description: 1,
-                            centre_name: 1
-                        }
-                    }
-                ];
+                    ];
 
-                const amenities = await collection
-                    .aggregate(pipeline)
-                    .toArray();
+                    const amenities = await collection
+                        .aggregate(pipeline)
+                        .toArray();
 
-                return {
-                    category: collectionName,
-                    count: amenities.length,
-                    amenities: amenities.map((item) => ({
-                        name:
-                            item.name ||
-                            item.station_na ||
-                            item.centre_name ||
-                            (item.bus_stop_num
-                                ? `Bus Stop ${item.bus_stop_num}`
-                                : "Unnamed amenity"),
+                    return {
+                        category: collectionName,
 
-                        distance_m: Math.round(item.distance_m),
+                        count: amenities.length,
 
-                        // MRT exit label from MongoDB
-                        exit_code: collectionName === "mrt_exits"
-                            ? (item.exit_code || null)
-                            : null,
+                        amenities: amenities.map(
+                            (item) => ({
+                                name:
+                                    item.name ||
+                                    item.station_na ||
+                                    item.centre_name ||
+                                    (item.bus_stop_num
+                                        ? `Bus Stop ${item.bus_stop_num}`
+                                        : "Unnamed amenity"),
 
-                        location: item.location
-                    }))
-                };
-            })
+                                distance_m:
+                                    Math.round(item.distance_m),
+
+                                exit_code:
+                                    collectionName === "mrt_exits"
+                                        ? (item.exit_code || null)
+                                        : null,
+
+                                location: item.location
+                            })
+                        )
+                    };
+                }
+            )
         );
 
-                // 5b. Optionally merge community-submitted places into each category
-        const includeCommunity = req.query.include_community === "1";
+        // ======================================
+        // 7. OPTIONAL COMMUNITY AMENITIES
+        // ======================================
+
         let communityIncluded = 0;
 
         if (includeCommunity) {
-            try {
-                const community = await communityByCategory(
-                    mongoDb,
-                    location,
-                    radius,
-                    5
-                );
 
-                for (const entry of results) {
-                    const extra = (community[entry.category] || []).map(
-                        (place) => ({
-                            name: place.name,
-                            distance_m: place.distance_m,
-                            exit_code: null,
-                            location: {
-                                type: "Point",
-                                coordinates: [place.lng, place.lat]
-                            },
-                            source: "community"
-                        })
+            try {
+
+                const community =
+                    await communityByCategory(
+                        mongoDb,
+                        location,
+                        radius,
+                        5
                     );
 
+                for (const entry of results) {
+
+                    const extra = (
+                        community[entry.category] || []
+                    ).map((place) => ({
+                        name: place.name,
+
+                        distance_m: place.distance_m,
+
+                        exit_code: null,
+
+                        location: {
+                            type: "Point",
+                            coordinates: [
+                                place.lng,
+                                place.lat
+                            ]
+                        },
+
+                        source: "community"
+                    }));
+
                     const merged = [
-                        ...entry.amenities.map((item) => ({
-                            ...item,
-                            source: "official"
-                        })),
+                        ...entry.amenities.map(
+                            (item) => ({
+                                ...item,
+                                source: "official"
+                            })
+                        ),
                         ...extra
                     ]
-                        .sort((a, b) => a.distance_m - b.distance_m)
+                        .sort(
+                            (a, b) =>
+                                a.distance_m - b.distance_m
+                        )
                         .slice(0, 5);
 
                     communityIncluded += merged.filter(
-                        (item) => item.source === "community"
+                        (item) =>
+                            item.source === "community"
                     ).length;
 
                     entry.amenities = merged;
                     entry.count = merged.length;
                 }
+
             } catch (error) {
-                // The official results are still returned if the community lookup fails
+
+                // Official amenities remain available
+                // if community lookup fails.
                 console.error(
                     "Community places could not be merged:",
                     error.message
                 );
             }
         }
-        
-        // 6. Return combined MySQL + MongoDB results
-        return res.json({
+
+        // ======================================
+        // 8. PREPARE API RESPONSE
+        // ======================================
+
+        const responseData = {
             status: "success",
+
             block: {
                 block_id: block.block_id,
-                address: `${block.blk_no} ${block.street_name}`,
+
+                address:
+                    `${block.blk_no} ${block.street_name}`,
+
                 latitude,
                 longitude
             },
+
             radius_m: radius,
+
             distance_type: "straight-line",
+
             categories: results,
+
             include_community: includeCommunity,
+
             community_included: communityIncluded
-        });
+        };
+
+        // ======================================
+        // 9. SAVE RESULTS TO CACHE
+        // ======================================
+
+        if (!includeCommunity) {
+
+            setCachedAmenities(
+                blockId,
+                radius,
+                responseData
+            );
+        }
+
+        // Cache miss means database queries were run
+        res.set("X-Cache", "MISS");
+
+        // ======================================
+        // 10. RETURN API RESPONSE
+        // ======================================
+
+        return res.json(responseData);
 
     } catch (error) {
+
         console.error(
             "Nearby amenities query failed:",
             error.message
