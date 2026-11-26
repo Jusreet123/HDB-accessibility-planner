@@ -24,6 +24,7 @@ async function main() {
             "-- Haven. MySQL Database Schema",
             "-- Exported from Aiven MySQL",
             "-- Structure only: no records included",
+            "-- Identifiers use backticks so this file runs on any MySQL 8 server",
             "",
             "SET FOREIGN_KEY_CHECKS = 0;",
             ""
@@ -38,7 +39,10 @@ async function main() {
                 `SHOW CREATE TABLE \`${escapedName}\``
             );
 
-            const createStatement = rows[0]["Create Table"];
+            // Aiven runs MySQL in ANSI mode, so SHOW CREATE TABLE quotes names
+            // with "double quotes". Standard MySQL rejects that, so switch
+            // them to `backticks` to keep schema.sql runnable anywhere.
+            const createStatement = rows[0]["Create Table"].replace(/"/g, "`");
 
             definitions.push(
                 `-- Table: ${table}`,
